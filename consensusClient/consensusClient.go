@@ -8,6 +8,8 @@ import (
 )
 
 type ConsensusClientComponent struct {
+	Client  string
+	Network string
 	pulumi.ResourceState
 }
 
@@ -40,7 +42,11 @@ func NewConsensusClientComponent(ctx *pulumi.Context, name string, args *Consens
 		return nil, err
 	}
 
-	switch args.Client {
+	// set the client and network
+	component.Client = args.Client
+	component.Network = args.Network
+
+	switch component.Client {
 	case Teku:
 		_, err = NewTekuComponent(ctx, "teku", args, pulumi.Parent(component))
 		if err != nil {
@@ -48,13 +54,29 @@ func NewConsensusClientComponent(ctx *pulumi.Context, name string, args *Consens
 			return nil, err
 		}
 	case Prysm:
-		ctx.Log.Error("Prysm client not yet supported", nil)
+		_, err = NewPrysmComponent(ctx, "prysm", args, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating prysm component", nil)
+			return nil, err
+		}
 	case Lighthouse:
-		ctx.Log.Error("Lighthouse client not yet supported", nil)
+		_, err = NewLighthouseComponent(ctx, "lighthouse", args, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating lighthouse component", nil)
+			return nil, err
+		}
 	case Lodestar:
-		ctx.Log.Error("Lodestar client not yet supported", nil)
+		_, err = NewLodestarComponent(ctx, "lodestar", args, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating lodestar component", nil)
+			return nil, err
+		}
 	case Nimbus:
-		ctx.Log.Error("Nimbus client not yet supported", nil)
+		_, err = NewNimbusComponent(ctx, "nimbus", args, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating nimbus component", nil)
+			return nil, err
+		}
 	}
 
 	return component, nil

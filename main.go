@@ -1,15 +1,14 @@
-package main
+package node_deployer
 
 import (
 	"fmt"
+	"node_deployer/consensusClient"
+	"node_deployer/executionClient"
 	"os"
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-
-	"github.com/rswanson/node-deployer/consensusClient"
-	"github.com/rswanson/node-deployer/executionClient"
 )
 
 type RethDeploymentComponent struct {
@@ -21,7 +20,7 @@ type RethDeploymentComponent struct {
 	ExecutionClient string
 }
 
-type RethDeploymentComponentArgs struct {
+type DeploymentComponentArgs struct {
 	Connection      *remote.ConnectionArgs
 	Network         string
 	DeploymentType  string
@@ -71,7 +70,7 @@ func main() {
 		// Read deploy type from system environment variables
 		deployType := os.Getenv("DEPLOY_TYPE")
 		if deployType == Source {
-			_, err := NewDeploymentComponent(ctx, "deploymentFromSource", &RethDeploymentComponentArgs{
+			_, err := NewDeploymentComponent(ctx, "deploymentFromSource", &DeploymentComponentArgs{
 				Connection:      connection,
 				Network:         Mainnet,
 				DeploymentType:  Source,
@@ -81,7 +80,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			_, err = NewDeploymentComponent(ctx, "deploymentFromSource", &RethDeploymentComponentArgs{
+			_, err = NewDeploymentComponent(ctx, "deploymentFromSource", &DeploymentComponentArgs{
 				Connection:      connection,
 				Network:         Mainnet,
 				DeploymentType:  Source,
@@ -114,9 +113,9 @@ func main() {
 	})
 }
 
-func NewDeploymentComponent(ctx *pulumi.Context, name string, args *RethDeploymentComponentArgs, opts ...pulumi.ResourceOption) (*RethDeploymentComponent, error) {
+func NewDeploymentComponent(ctx *pulumi.Context, name string, args *DeploymentComponentArgs, opts ...pulumi.ResourceOption) (*RethDeploymentComponent, error) {
 	if args == nil {
-		args = &RethDeploymentComponentArgs{}
+		args = &DeploymentComponentArgs{}
 	}
 
 	component := &RethDeploymentComponent{}

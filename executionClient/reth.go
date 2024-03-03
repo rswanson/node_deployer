@@ -9,7 +9,7 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
-func NewExecutionClientComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
+func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}
 	}
