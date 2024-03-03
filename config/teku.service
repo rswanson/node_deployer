@@ -1,0 +1,18 @@
+[Unit]
+Description=Teku Service
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+User=teku
+ExecStart=/data/scripts/start_teku.sh
+Restart=always
+RestartSec=30s  
+
+# logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=teku
+
+[Install]
+WantedBy=multi-user.target

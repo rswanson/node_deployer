@@ -1,0 +1,21 @@
+[Unit]
+Description=Nimbus Service
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+User=reth
+ExecStart=/data/scripts/start_nimbus.sh
+Restart=always
+RestartSec=30s
+
+# environment
+Environment="INSTANCE_ID=1"
+
+# logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nimbus
+
+[Install]
+WantedBy=multi-user.target

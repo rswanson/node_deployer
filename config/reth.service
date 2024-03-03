@@ -1,0 +1,18 @@
+[Unit]
+Description=Reth Service
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+User=reth
+ExecStart=/data/scripts/start_reth.sh
+Restart=always
+RestartSec=30s
+
+# logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=reth
+
+[Install]
+WantedBy=multi-user.target
