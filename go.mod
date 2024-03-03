@@ -1,4 +1,4 @@
-module node_deployer
+module github.com/rswanson/node_deployer
 
 go 1.22.0
 
