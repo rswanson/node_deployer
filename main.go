@@ -2,16 +2,17 @@ package node_deployer
 
 import (
 	"fmt"
-	"node_deployer/consensusClient"
-	"node_deployer/executionClient"
 	"os"
+
+	"github.com/rswanson/node_deployer/consensusClient"
+	"github.com/rswanson/node_deployer/executionClient"
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
-type RethDeploymentComponent struct {
+type DeploymentComponent struct {
 	pulumi.ResourceState
 	Connection      *remote.ConnectionArgs
 	Network         string
@@ -113,13 +114,13 @@ func main() {
 	})
 }
 
-func NewDeploymentComponent(ctx *pulumi.Context, name string, args *DeploymentComponentArgs, opts ...pulumi.ResourceOption) (*RethDeploymentComponent, error) {
+func NewDeploymentComponent(ctx *pulumi.Context, name string, args *DeploymentComponentArgs, opts ...pulumi.ResourceOption) (*DeploymentComponent, error) {
 	if args == nil {
 		args = &DeploymentComponentArgs{}
 	}
 
-	component := &RethDeploymentComponent{}
-	err := ctx.RegisterComponentResource("custom:resource:RethDeployment", name, component, opts...)
+	component := &DeploymentComponent{}
+	err := ctx.RegisterComponentResource("custom:resource:NodeDeployment", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

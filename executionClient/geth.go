@@ -15,7 +15,7 @@ func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 	}
 
 	component := &ExecutionClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("reth:consensus:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ConsensusClient:%s", args.Client), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

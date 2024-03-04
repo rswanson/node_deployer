@@ -3,7 +3,7 @@ package executionClient_test
 import (
 	"testing"
 
-	el "node_deployer/executionClient"
+	el "github.com/rswanson/node_deployer/executionClient"
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"

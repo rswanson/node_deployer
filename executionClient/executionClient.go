@@ -1,8 +1,6 @@
 package executionClient
 
 import (
-	"fmt"
-
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -36,7 +34,7 @@ func NewExecutionClientComponent(ctx *pulumi.Context, name string, args *Executi
 	}
 
 	component := &ExecutionClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("reth:execution:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource("custom:component:ExecutionClient", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

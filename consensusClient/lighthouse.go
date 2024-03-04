@@ -16,7 +16,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 	}
 
 	component := &ConsensusClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("reth:consensus:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:componenet:ConsensusClient:%s", args.Client), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

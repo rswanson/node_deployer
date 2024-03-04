@@ -25,7 +25,7 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 	component := &ServiceDefinitionComponent{
 		ServiceType: args.ServiceType,
 	}
-	err := ctx.RegisterComponentResource("reth:service:Component", name, component, opts...)
+	err := ctx.RegisterComponentResource("custom:resource:ServiceDefinitionComponent", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

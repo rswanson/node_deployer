@@ -1,8 +1,9 @@
 package consensusClient_test
 
 import (
-	"node_deployer/consensusClient"
 	"testing"
+
+	"github.com/rswanson/node_deployer/consensusClient"
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"

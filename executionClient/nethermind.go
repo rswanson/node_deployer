@@ -15,7 +15,7 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 	}
 
 	component := &ExecutionClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("reth:consensus:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ExecutionClient:%s", args.Client), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +64,13 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 			return nil, err
 		}
 
-		// build consensus client
-		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildConsensusClient-%s", args.Client), &remote.CommandArgs{
+		// build execution client
+		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildExecutionClient-%s", args.Client), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("cd /data/repos/%s && sudo -u %s dotnet build -c Release", args.Client, args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{dotnetDeps, repoPerms}))
 		if err != nil {
-			ctx.Log.Error("Error building consensus client", nil)
+			ctx.Log.Error("Error building execution client", nil)
 			return nil, err
 		}
 
@@ -96,12 +96,12 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 		}
 
 		// create service
-		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("consensusService-%s", args.Client), &utils.ServiceComponentArgs{
+		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("executionService-%s", args.Client), &utils.ServiceComponentArgs{
 			Connection:  args.Connection,
 			ServiceType: args.Client,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{buildClient, scriptPerms}))
 		if err != nil {
-			ctx.Log.Error("Error creating consensus service", nil)
+			ctx.Log.Error("Error creating execution service", nil)
 			return nil, err
 		}
 
