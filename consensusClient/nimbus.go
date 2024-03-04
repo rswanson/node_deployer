@@ -9,6 +9,22 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewNimbusComponent creates a new consensus client component for Nimbus
+// and returns a pointer to the component
+//
+// Example usage:
+//
+//	client, err := consensusClient.NewNimbusComponent(ctx, "testNimbusConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"),             // username for the ssh connection
+//			Host:       cfg.Require("sshHost"),             // ip address of the host
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"), // must be a secret, RequireSecret is critical for security
+//		},
+//		Client:         "nimbus",             // must be "nimbus"
+//		Network:        "mainnet",            // mainnet, sepolia, or holesky
+//		DeploymentType: "source",             // source, binary, docker
+//		DataDir:        "/data/nimbus",	  // path to the data directory
+//	})
 func NewNimbusComponent(ctx *pulumi.Context, name string, args *ConsensusClientComponentArgs, opts ...pulumi.ResourceOption) (*ConsensusClientComponent, error) {
 	if args == nil {
 		args = &ConsensusClientComponentArgs{}

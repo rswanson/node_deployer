@@ -28,6 +28,24 @@ const (
 	Docker     = "docker"
 )
 
+// NewExecutionClientComponent creates a new instance of the ExecutionClientComponent
+// and calls the appropriate component constructor based on the client
+// being requested.
+// It returns a pointer to the ExecutionClientComponent and an error
+//
+// Example usage:
+//
+//	client, err := executionClient.NewExecutionClientComponent(ctx, "testRethExecutionClient", &executionClient.ExecutionClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"),
+//			Host:       cfg.Require("sshHost"),
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"),
+//		},
+//		Client:         "reth",
+//		Network:        "mainnet",
+//		DeploymentType: "source",
+//		DataDir:        "/data/mainnet/reth",
+//	})
 func NewExecutionClientComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}

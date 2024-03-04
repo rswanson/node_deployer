@@ -9,6 +9,22 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewNethermindComponent creates a new Nethermind execution client component
+// and the necessary infrastructure to run it.
+//
+// Example usage:
+//
+//	client, err := executionClient.NewNethermindComponent(ctx, "testNethermindExecutionClient", &executionClient.ExecutionClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"), // username for the ssh connection
+//			Host:       cfg.Require("sshHost"), // ip address of the host
+//			PrivateKey: cfg.RequireSecret("
+//		},
+//		Client:         "nethermind", // must be "nethermind"
+//		Network:        "mainnet", // mainnet, sepolia, or holesky
+//		DeploymentType: "source", // source, binary, docker
+//		DataDir:        "/data/mainnet/nethermind", // path to the data directory
+//	})
 func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}

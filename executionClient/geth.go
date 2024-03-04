@@ -9,13 +9,29 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewGethComponent creates a new ExecutionClientComponent resource that represents a geth client
+// and the necessary infrastructure to run it.
+//
+// Example usage:
+//
+//	client, err := executionClient.NewGethComponent(ctx, "testGethExecutionClient", &executionClient.ExecutionClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"), // username for the ssh connection
+//			Host:       cfg.Require("sshHost"), // ip address of the host
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"), // must be a secret, RequireSecret is critical for security
+//		},
+//		Client:         "geth", // must be "geth"
+//		Network:        "mainnet", // mainnet, sepolia, or holesky
+//		DeploymentType: "source", // source, binary, docker
+//		DataDir:        "/data/mainnet/geth", // path to the data directory
+//	})
 func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}
 	}
 
 	component := &ExecutionClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ConsensusClient:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ExecutionClient:%s", args.Client), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +80,13 @@ func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			return nil, err
 		}
 
-		// build consensus client
-		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildConsensusClient-%s", args.Client), &remote.CommandArgs{
+		// build execution client
+		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildExecutionClient-%s", args.Client), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("cd /data/repos/%s && sudo -u %s make geth", args.Client, args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{goDeps, repoPerms}))
 		if err != nil {
-			ctx.Log.Error("Error building consensus client", nil)
+			ctx.Log.Error("Error building execution client", nil)
 			return nil, err
 		}
 
@@ -106,12 +122,12 @@ func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// create service
-		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("consensusService-%s", args.Client), &utils.ServiceComponentArgs{
+		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("executionService-%s", args.Client), &utils.ServiceComponentArgs{
 			Connection:  args.Connection,
 			ServiceType: args.Client,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{buildClient, scriptPerms}))
 		if err != nil {
-			ctx.Log.Error("Error creating consensus service", nil)
+			ctx.Log.Error("Error creating execution service", nil)
 			return nil, err
 		}
 

@@ -29,6 +29,24 @@ const (
 	Binary     = "binary"
 )
 
+// NewConsensusClientComponent creates a new instance of the ConsensusClientComponent
+// and calls the appropriate component constructor based on the client
+// being requested.
+// It returns a pointer to the ConsensusClientComponent and an error
+//
+// Example usage:
+//
+//	client, err := consensusClient.NewConsensusClientComponent(ctx, "testLighthouseConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"),
+//			Host:       cfg.Require("sshHost"),
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"),
+//		},
+//		Client:         "lighthouse",
+//		Network:        "mainnet",
+//		DeploymentType: "source",
+//		DataDir:        "/data/lighthouse",
+//	})
 func NewConsensusClientComponent(ctx *pulumi.Context, name string, args *ConsensusClientComponentArgs, opts ...pulumi.ResourceOption) (*ConsensusClientComponent, error) {
 	if args == nil {
 		args = &ConsensusClientComponentArgs{}

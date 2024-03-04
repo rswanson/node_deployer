@@ -9,13 +9,29 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewTekuComponent creates a new consensus client component for teku
+// and returns a pointer to the component
+//
+// Example usage:
+//
+//	client, err := consensusClient.NewTekuComponent(ctx, "testTekuConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"),             // username for the ssh connection
+//			Host:       cfg.Require("sshHost"),             // ip address of the host
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"), // must be a secret, RequireSecret is critical for security
+//		},
+//		Client:         "teku",               // must be "teku"
+//		Network:        "mainnet",            // mainnet, sepolia, or holesky
+//		DeploymentType: "source",             // source, binary, docker
+//		DataDir:        "/data/teku",	  // path to the data directory
+//	})
 func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientComponentArgs, opts ...pulumi.ResourceOption) (*ConsensusClientComponent, error) {
 	if args == nil {
 		args = &ConsensusClientComponentArgs{}
 	}
 
 	component := &ConsensusClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("reth:consensus:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ConsensusClient:%s", args.Client), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,22 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewRethComponent creates a new reth execution client component
+// and the necessary infrastructure to run it.
+//
+// Example usage:
+//
+//	client, err := executionClient.NewRethComponent(ctx, "testRethExecutionClient", &executionClient.ExecutionClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"), // username for the ssh connection
+//			Host:       cfg.Require("sshHost"), // ip address of the host
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"), // must be a secret, RequireSecret is critical for security
+//		},
+//		Client:         "reth", // must be "reth"
+//		Network:        "mainnet", // mainnet, sepolia, or holesky
+//		DeploymentType: "source", // source, binary, docker
+//		DataDir:        "/data/mainnet/reth", // path to the data directory
+//	})
 func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}

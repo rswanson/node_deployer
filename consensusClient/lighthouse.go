@@ -10,6 +10,22 @@ import (
 	"github.com/rswanson/node-deployer/utils"
 )
 
+// NewLighthouseComponent creates a new consensus client component for Lighthouse
+// and returns a pointer to the component
+//
+// Example usage:
+//
+//	client, err := consensusClient.NewLighthouseComponent(ctx, "testLighthouseConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+//		Connection:     &remote.ConnectionArgs{
+//			User:       cfg.Require("sshUser"),             // username for the ssh connection
+//			Host:       cfg.Require("sshHost"),             // ip address of the host
+//			PrivateKey: cfg.RequireSecret("sshPrivateKey"), // must be a secret, RequireSecret is critical for security
+//		},
+//		Client:         "lighthouse",         // must be "lighthouse"
+//		Network:        "mainnet",            // mainnet, sepolia, or holesky
+//		DeploymentType: "source",             // source, binary, docker
+//		DataDir:        "/data/lighthouse",	  // path to the data directory
+//	})
 func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusClientComponentArgs, opts ...pulumi.ResourceOption) (*ConsensusClientComponent, error) {
 	if args == nil {
 		args = &ConsensusClientComponentArgs{}
