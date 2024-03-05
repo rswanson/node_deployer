@@ -53,7 +53,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// clone repo
 		repo, err := remote.NewCommand(ctx, fmt.Sprintf("cloneRepo-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/%s", cfg.Require("lighthouseBranch"), cfg.Require("lighthouseRepoUrl"), args.Client),
+			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/%s", cfg.Require("lighthouseBranch"), cfg.Require("lighthouseRepoURL"), args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {

@@ -73,7 +73,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// Execute a sequence of commands on the remote serve`r
 		repo, err := remote.NewCommand(ctx, "cloneRepo", &remote.CommandArgs{
-			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/reth", cfg.Require("gitBranch"), cfg.Require("repoURL")),
+			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/reth", cfg.Require("rethGitBranch"), cfg.Require("rethRepoURL")),
 			Update:     pulumi.String("cd /data/repos/reth && git pull"),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.ReplaceOnChanges([]string{"*"}))
@@ -101,14 +101,26 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			ctx.Log.Error("Error installing rust toolchain", nil)
 			return nil, err
 		}
+		rethInstallation := &remote.Command{}
+		if args.Network == "base" {
+			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin reth --root /data", args.Connection.User),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
+			if err != nil {
+				ctx.Log.Error("Error installing reth", nil)
+				return nil, err
+			}
+		} else {
 
-		rethInstallation, err := remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
-			Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin reth --root /data", args.Connection.User),
-			Connection: args.Connection,
-		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
-		if err != nil {
-			ctx.Log.Error("Error installing reth", nil)
-			return nil, err
+			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin op-reth --features \"optimism\" --root /data", args.Connection.User),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
+			if err != nil {
+				ctx.Log.Error("Error installing reth", nil)
+				return nil, err
+			}
 		}
 
 		// group permissions
@@ -121,15 +133,25 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			return nil, err
 		}
 
-		_, err = utils.NewServiceDefinitionComponent(ctx, "rethService", &utils.ServiceComponentArgs{
-			Connection:  args.Connection,
-			ServiceType: args.Client,
-		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
-		if err != nil {
-			ctx.Log.Error("Error creating reth service", nil)
-			return nil, err
+		if args.Network == "base" {
+			_, err = utils.NewServiceDefinitionComponent(ctx, "rethBaseService", &utils.ServiceComponentArgs{
+				Connection:  args.Connection,
+				ServiceType: args.Network,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
+			if err != nil {
+				ctx.Log.Error("Error creating reth service", nil)
+				return nil, err
+			}
+		} else {
+			_, err = utils.NewServiceDefinitionComponent(ctx, "rethService", &utils.ServiceComponentArgs{
+				Connection:  args.Connection,
+				ServiceType: args.Client,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
+			if err != nil {
+				ctx.Log.Error("Error creating reth service", nil)
+				return nil, err
+			}
 		}
-
 	} else if args.DeploymentType == Binary {
 		ctx.Log.Error("Binary deployment type not yet supported", nil)
 	} else if args.DeploymentType == Docker {
