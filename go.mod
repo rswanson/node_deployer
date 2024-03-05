@@ -2,15 +2,10 @@ module github.com/rswanson/node_deployer
 
 go 1.22.0
 
-replace github.com/rswanson/node_deployer => .
-
-replace github.com/rswanson/node_deployer/utils => ./utils
-
 require (
 	github.com/pulumi/pulumi-command/sdk v0.9.2
 	github.com/pulumi/pulumi/sdk/v3 v3.103.1
-	github.com/rswanson/node-deployer/utils v0.0.0-20240303202045-b896963d13f4
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -68,6 +63,7 @@ require (
 	github.com/pulumi/esc v0.6.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rswanson/node-deployer/utils v0.0.0-20240303214931-c82ea38e6c22 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.0.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
