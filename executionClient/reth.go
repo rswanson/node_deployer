@@ -104,7 +104,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		rethInstallation := &remote.Command{}
 		if args.Network == "base" {
 			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
-				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin op-reth --root /data", args.Connection.User),
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin op-reth --features \"optimism\" --root /data", args.Connection.User),
 				Connection: args.Connection,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
 			if err != nil {
@@ -114,7 +114,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		} else {
 
 			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
-				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin reth --features \"optimism\" --root /data", args.Connection.User),
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin reth --root /data", args.Connection.User),
 				Connection: args.Connection,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
 			if err != nil {
