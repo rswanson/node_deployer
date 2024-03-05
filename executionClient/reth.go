@@ -94,7 +94,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// install rust toolchain
 		rustToolchain, err := remote.NewCommand(ctx, "installRust", &remote.CommandArgs{
-			Create:     pulumi.String("sudo -u reth curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"),
+			Create:     pulumi.String("sudo -u reth curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u reth sh -s -- -y"),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {

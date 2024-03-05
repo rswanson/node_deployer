@@ -63,7 +63,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// install rust toolchain
 		rustToolchain, err := remote.NewCommand(ctx, fmt.Sprintf("installRust-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("sudo -u %s curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y", args.Client),
+			Create:     pulumi.String("sudo -u lighthouse curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u lighthouse sh -s -- -y"),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -73,7 +73,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// build consensus client
 		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildConsensusClient-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("cd /data/repos/%s && sudo -u %s cargo install --locked --path /data/repos/lighthouse/bin/lighthouse --bin lighthouse --root /data", args.Client, args.Client),
+			Create:     pulumi.Sprintf("cd /data/repos/%s && sudo -u %s /home/lighthouse/.cargo/bin/cargo/cargo install --locked --path /data/repos/lighthouse/bin/lighthouse --bin lighthouse --root /data", args.Client, args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain}))
 		if err != nil {
