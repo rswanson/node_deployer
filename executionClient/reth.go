@@ -52,8 +52,8 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// copy start script
 		startScript, err := remote.NewCopyFile(ctx, fmt.Sprintf("copyStartScript-%s", args.Network), &remote.CopyFileArgs{
-			LocalPath:  pulumi.Sprintf("scripts/start_%s.sh", args.Client),
-			RemotePath: pulumi.Sprintf("/data/scripts/start_%s.sh", args.Client),
+			LocalPath:  pulumi.Sprintf("scripts/start_%s_%s.sh", args.Client, args.Network),
+			RemotePath: pulumi.Sprintf("/data/scripts/start_%s_%s.sh", args.Client, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -63,7 +63,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// script permissions
 		_, err = remote.NewCommand(ctx, fmt.Sprintf("scriptPermissions-%s", args.Network), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("chmod +x /data/scripts/start_%s.sh", args.Client),
+			Create:     pulumi.Sprintf("chmod +x /data/scripts/start_%s_%s.sh", args.Client, args.Network),
 			Delete:     pulumi.Sprintf("echo 0", args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{startScript}))
@@ -126,7 +126,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// group permissions
 		groupPerms, err := remote.NewCommand(ctx, fmt.Sprintf("setDataDirGroupPermissions-%s", args.Network), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("chown -R %s:%s %s && chown %s:%s /data/bin/%s && chown %s:%s /data/scripts/start_%s.sh", args.Client, args.Client, args.DataDir, args.Client, args.Client, args.Client, args.Client, args.Client, args.Client),
+			Create:     pulumi.Sprintf("chown -R %s:%s %s && chown %s:%s /data/bin/%s && chown %s:%s /data/scripts/start_%s_%s.sh", args.Client, args.Client, args.DataDir, args.Client, args.Client, args.Client, args.Client, args.Client, args.Client, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, startScript, rethInstallation}))
 		if err != nil {

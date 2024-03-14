@@ -92,8 +92,8 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// copy start script
 		startScript, err := remote.NewCopyFile(ctx, fmt.Sprintf("copyStartScript-%s", args.Client), &remote.CopyFileArgs{
-			LocalPath:  pulumi.Sprintf("scripts/start_%s.sh", args.Client),
-			RemotePath: pulumi.Sprintf("/data/scripts/start_%s.sh", args.Client),
+			LocalPath:  pulumi.Sprintf("scripts/start_%s_%s.sh", args.Client, args.Network),
+			RemotePath: pulumi.Sprintf("/data/scripts/start_%s_%s.sh", args.Client, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -103,7 +103,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// script permissions
 		scriptPerms, err := remote.NewCommand(ctx, fmt.Sprintf("scriptPermissions-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("chmod +x /data/scripts/start_%s.sh", args.Client),
+			Create:     pulumi.Sprintf("chmod +x /data/scripts/start_%s_%s.sh", args.Client, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{startScript}))
 		if err != nil {
@@ -123,7 +123,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// group permissions
 		_, err = remote.NewCommand(ctx, fmt.Sprintf("setDataDirGroupPermissions-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("chown -R %s:%s %s && chown %s:%s /data/bin/%s && chown %s:%s /data/scripts/start_%s.sh", args.Client, args.Client, args.DataDir, args.Client, args.Client, args.Client, args.Client, args.Client, args.Client),
+			Create:     pulumi.Sprintf("chown -R %s:%s %s && chown %s:%s /data/bin/%s && chown %s:%s /data/scripts/start_%s_%s.sh", args.Client, args.Client, args.DataDir, args.Client, args.Client, args.Client, args.Client, args.Client, args.Client, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{serviceDefinition, scriptPerms, startScript}))
 		if err != nil {
