@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/pulumi/pulumi-command/sdk v0.9.2
 	github.com/pulumi/pulumi/sdk/v3 v3.103.1
+	github.com/rswanson/node-deployer/utils v0.0.0-20240303214931-c82ea38e6c22
 	github.com/stretchr/testify v1.9.0
 )
 
@@ -63,7 +64,6 @@ require (
 	github.com/pulumi/esc v0.6.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/rswanson/node-deployer/utils v0.0.0-20240303214931-c82ea38e6c22 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.0.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
@@ -71,7 +71,6 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/tweekmonster/luser v0.0.0-20161003172636-3fa38070dbd7 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
