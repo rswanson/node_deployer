@@ -1,6 +1,8 @@
 package consensusClient
 
 import (
+	"fmt"
+
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -53,7 +55,7 @@ func NewConsensusClientComponent(ctx *pulumi.Context, name string, args *Consens
 	}
 
 	component := &ConsensusClientComponent{}
-	err := ctx.RegisterComponentResource("custom:componenet:ConsensusClient", name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ConsensusClient:%s:%s", args.Client, args.Network), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
