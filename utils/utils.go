@@ -8,12 +8,12 @@ import (
 )
 
 type ServiceDefinitionComponent struct {
-	ServiceType string
 	pulumi.ResourceState
 }
 
 type ServiceComponentArgs struct {
 	Connection  *remote.ConnectionArgs
+	Network     string
 	ServiceType string
 }
 
@@ -22,17 +22,15 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 		args = &ServiceComponentArgs{}
 	}
 
-	component := &ServiceDefinitionComponent{
-		ServiceType: args.ServiceType,
-	}
+	component := &ServiceDefinitionComponent{}
 	err := ctx.RegisterComponentResource("custom:resource:ServiceDefinitionComponent", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	serviceDefinition, err := remote.NewCopyFile(ctx, fmt.Sprintf("createServiceDefinition-%s", args.ServiceType), &remote.CopyFileArgs{
-		LocalPath:  pulumi.Sprintf("config/%s.service", component.ServiceType),
-		RemotePath: pulumi.Sprintf("/etc/systemd/system/%s.service", component.ServiceType),
+	serviceDefinition, err := remote.NewCopyFile(ctx, fmt.Sprintf("createServiceDefinition-%s-%s", args.ServiceType, args.Network), &remote.CopyFileArgs{
+		LocalPath:  pulumi.Sprintf("config/%s.%s.service", args.ServiceType, args.Network),
+		RemotePath: pulumi.Sprintf("/etc/systemd/system/%s.%s.service", args.ServiceType, args.Network),
 		Connection: args.Connection,
 	}, pulumi.Parent(component))
 	if err != nil {
@@ -41,7 +39,8 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 	}
 
 	enableService, err := remote.NewCommand(ctx, fmt.Sprintf("enableService-%s", args.ServiceType), &remote.CommandArgs{
-		Create:     pulumi.Sprintf("systemctl enable %s", args.ServiceType),
+		Create:     pulumi.Sprintf("systemctl enable %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
+		Delete:     pulumi.Sprintf("systemctl disable %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Connection: args.Connection,
 	}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{serviceDefinition}))
 	if err != nil {
@@ -50,7 +49,8 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 	}
 
 	_, err = remote.NewCommand(ctx, fmt.Sprintf("startService-%s", args.ServiceType), &remote.CommandArgs{
-		Create:     pulumi.Sprintf("systemctl start %s", args.ServiceType),
+		Create:     pulumi.Sprintf("systemctl start %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
+		Delete:     pulumi.Sprintf("systemctl stop %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Connection: args.Connection,
 	}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{enableService}))
 	if err != nil {
