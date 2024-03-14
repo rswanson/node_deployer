@@ -37,7 +37,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 	}
 
 	// Execute a sequence of commands on the remote server
-	_, err = remote.NewCommand(ctx, "createDataDir", &remote.CommandArgs{
+	_, err = remote.NewCommand(ctx, fmt.Sprintf("createDataDir-%s", args.Network), &remote.CommandArgs{
 		Create:     pulumi.Sprintf("mkdir -p %s", args.DataDir),
 		Connection: args.Connection,
 	}, pulumi.Parent(component))
@@ -51,7 +51,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		cfg := config.New(ctx, "")
 
 		// copy start script
-		startScript, err := remote.NewCopyFile(ctx, "copyStartScript", &remote.CopyFileArgs{
+		startScript, err := remote.NewCopyFile(ctx, fmt.Sprintf("copyStartScript-%s", args.Network), &remote.CopyFileArgs{
 			LocalPath:  pulumi.Sprintf("scripts/start_%s.sh", args.Client),
 			RemotePath: pulumi.Sprintf("/data/scripts/start_%s.sh", args.Client),
 			Connection: args.Connection,
@@ -62,8 +62,9 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// script permissions
-		_, err = remote.NewCommand(ctx, "scriptPermissions", &remote.CommandArgs{
+		_, err = remote.NewCommand(ctx, fmt.Sprintf("scriptPermissions-%s", args.Network), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("chmod +x /data/scripts/start_%s.sh", args.Client),
+			Delete:     pulumi.Sprintf("echo 0", args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{startScript}))
 		if err != nil {
@@ -72,7 +73,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// Execute a sequence of commands on the remote serve`r
-		repo, err := remote.NewCommand(ctx, "cloneRepo", &remote.CommandArgs{
+		repo, err := remote.NewCommand(ctx, fmt.Sprintf("cloneRepo-%s", args.Network), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/reth", cfg.Require("rethGitBranch"), cfg.Require("rethRepoURL")),
 			Update:     pulumi.String("cd /data/repos/reth && git pull"),
 			Connection: args.Connection,
@@ -83,8 +84,8 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// set group permissions
-		ownership, err := remote.NewCommand(ctx, "setGroupPermissions", &remote.CommandArgs{
-			Create:     pulumi.String("chown -R reth:reth /data"),
+		ownership, err := remote.NewCommand(ctx, fmt.Sprintf("setGroupPermissions-%s", args.Network), &remote.CommandArgs{
+			Create:     pulumi.String("chown -R reth:reth /data/repos/reth"),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, startScript}))
 		if err != nil {
@@ -93,7 +94,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// install rust toolchain
-		rustToolchain, err := remote.NewCommand(ctx, "installRust", &remote.CommandArgs{
+		rustToolchain, err := remote.NewCommand(ctx, fmt.Sprintf("installRust-%s", args.Network), &remote.CommandArgs{
 			Create:     pulumi.String("sudo -u reth curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u reth sh -s -- -y"),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
@@ -103,7 +104,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 		rethInstallation := &remote.Command{}
 		if args.Network == "base" {
-			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
+			rethInstallation, err = remote.NewCommand(ctx, fmt.Sprintf("installReth-%s", args.Network), &remote.CommandArgs{
 				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin op-reth --features \"optimism\" --root /data", args.Connection.User),
 				Connection: args.Connection,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
@@ -113,7 +114,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			}
 		} else {
 
-			rethInstallation, err = remote.NewCommand(ctx, "installReth", &remote.CommandArgs{
+			rethInstallation, err = remote.NewCommand(ctx, fmt.Sprintf("installReth-%s", args.Network), &remote.CommandArgs{
 				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/reth/bin/reth --bin reth --root /data", args.Connection.User),
 				Connection: args.Connection,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
@@ -124,7 +125,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// group permissions
-		groupPerms, err := remote.NewCommand(ctx, "setDataDirGroupPermissions", &remote.CommandArgs{
+		groupPerms, err := remote.NewCommand(ctx, fmt.Sprintf("setDataDirGroupPermissions-%s", args.Network), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("chown -R %s:%s %s && chown %s:%s /data/bin/%s && chown %s:%s /data/scripts/start_%s.sh", args.Client, args.Client, args.DataDir, args.Client, args.Client, args.Client, args.Client, args.Client, args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, startScript, rethInstallation}))
@@ -134,7 +135,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		if args.Network == "base" {
-			_, err = utils.NewServiceDefinitionComponent(ctx, "rethBaseService", &utils.ServiceComponentArgs{
+			_, err = utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("rethBaseService-%s", args.Network), &utils.ServiceComponentArgs{
 				Connection:  args.Connection,
 				ServiceType: args.Network,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
@@ -143,7 +144,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 				return nil, err
 			}
 		} else {
-			_, err = utils.NewServiceDefinitionComponent(ctx, "rethService", &utils.ServiceComponentArgs{
+			_, err = utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("rethService-%s", args.Network), &utils.ServiceComponentArgs{
 				Connection:  args.Connection,
 				ServiceType: args.Client,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
