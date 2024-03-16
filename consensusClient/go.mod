@@ -5,7 +5,6 @@ go 1.22.1
 require (
 	github.com/pulumi/pulumi-command/sdk v0.9.2
 	github.com/pulumi/pulumi/sdk/v3 v3.111.1
-	github.com/rswanson/node-deployer/utils v0.0.0-20240303214931-c82ea38e6c22
 	github.com/stretchr/testify v1.9.0
 )
 

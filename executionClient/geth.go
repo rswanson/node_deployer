@@ -6,6 +6,7 @@ import (
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	"github.com/rswanson/node_deployer/utils"
 )
 
 // NewGethComponent creates a new ExecutionClientComponent resource that represents a geth client
@@ -121,7 +122,7 @@ func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		}
 
 		// create service
-		serviceDefinition, err := NewServiceDefinitionComponent(ctx, fmt.Sprintf("executionService-%s", args.Client), &ServiceComponentArgs{
+		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("executionService-%s", args.Client), &utils.ServiceComponentArgs{
 			Connection:  args.Connection,
 			ServiceType: args.Client,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{buildClient, scriptPerms}))

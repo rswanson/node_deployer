@@ -7,7 +7,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 
-	"github.com/rswanson/node-deployer/utils"
+	"github.com/rswanson/node_deployer/utils"
 )
 
 // NewLighthouseComponent creates a new consensus client component for Lighthouse

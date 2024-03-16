@@ -1,4 +1,4 @@
-module github.com/rswanson/node-deployer/utils
+module github.com/rswanson/node_deployer/utils
 
 go 1.22.1
 
