@@ -85,7 +85,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 
 		// set group permissions
 		ownership, err := remote.NewCommand(ctx, fmt.Sprintf("setGroupPermissions-%s", args.Network), &remote.CommandArgs{
-			Create:     pulumi.String("chown -R reth:reth /data/repos/reth"),
+			Create:     pulumi.Sprintf("chown -R reth:reth /data/repos/%s/reth", args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, startScript}))
 		if err != nil {
