@@ -115,6 +115,7 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("consensusService-%s", args.Client), &utils.ServiceComponentArgs{
 			Connection:  args.Connection,
 			ServiceType: args.Client,
+			Network:     args.Network,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{buildClient, scriptPerms}))
 		if err != nil {
 			ctx.Log.Error("Error creating consensus service", nil)

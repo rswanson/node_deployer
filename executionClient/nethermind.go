@@ -115,6 +115,7 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 		serviceDefinition, err := utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("executionService-%s", args.Client), &utils.ServiceComponentArgs{
 			Connection:  args.Connection,
 			ServiceType: args.Client,
+			Network:     args.Network,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{buildClient, scriptPerms}))
 		if err != nil {
 			ctx.Log.Error("Error creating execution service", nil)

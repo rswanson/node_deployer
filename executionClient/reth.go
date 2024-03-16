@@ -138,6 +138,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			_, err = utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("rethBaseService-%s", args.Network), &utils.ServiceComponentArgs{
 				Connection:  args.Connection,
 				ServiceType: args.Network,
+				Network:     args.Network,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
 			if err != nil {
 				ctx.Log.Error("Error creating reth service", nil)
@@ -147,6 +148,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			_, err = utils.NewServiceDefinitionComponent(ctx, fmt.Sprintf("rethService-%s", args.Network), &utils.ServiceComponentArgs{
 				Connection:  args.Connection,
 				ServiceType: args.Client,
+				Network:     args.Network,
 			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{groupPerms, rethInstallation}))
 			if err != nil {
 				ctx.Log.Error("Error creating reth service", nil)
