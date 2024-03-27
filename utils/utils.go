@@ -38,7 +38,7 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 		return nil, err
 	}
 
-	enableService, err := remote.NewCommand(ctx, fmt.Sprintf("enableService-%s", args.ServiceType), &remote.CommandArgs{
+	enableService, err := remote.NewCommand(ctx, fmt.Sprintf("enableService-%s-%s", args.ServiceType, args.Network), &remote.CommandArgs{
 		Create:     pulumi.Sprintf("systemctl enable %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Delete:     pulumi.Sprintf("systemctl disable %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Connection: args.Connection,
@@ -48,7 +48,7 @@ func NewServiceDefinitionComponent(ctx *pulumi.Context, name string, args *Servi
 		return nil, err
 	}
 
-	_, err = remote.NewCommand(ctx, fmt.Sprintf("startService-%s", args.ServiceType), &remote.CommandArgs{
+	_, err = remote.NewCommand(ctx, fmt.Sprintf("startService-%s-%s", args.ServiceType, args.Network), &remote.CommandArgs{
 		Create:     pulumi.Sprintf("systemctl start %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Delete:     pulumi.Sprintf("systemctl stop %s", fmt.Sprintf("%s.%s", args.ServiceType, args.Network)),
 		Connection: args.Connection,
