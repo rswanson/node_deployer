@@ -53,7 +53,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// clone repo
 		repo, err := remote.NewCommand(ctx, fmt.Sprintf("cloneRepo-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/%s", cfg.Require("lighthouseBranch"), cfg.Require("lighthouseRepoURL"), args.Client),
+			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/%s/%s", cfg.Require("lighthouseBranch"), cfg.Require("lighthouseRepoURL"), args.Network, args.Client),
 			Connection: args.Connection,
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -82,7 +82,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 
 		// build consensus client
 		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildConsensusClient-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/lighthouse/lighthouse --bin lighthouse --root /data", args.Connection.User),
+			Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/%s/lighthouse/lighthouse --bin lighthouse --root /data", args.Connection.User, args.Network),
 			Connection: args.Connection,
 		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, dependencies}))
 		if err != nil {

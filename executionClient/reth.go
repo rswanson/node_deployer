@@ -76,8 +76,9 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		repo, err := remote.NewCommand(ctx, fmt.Sprintf("cloneRepo-%s", args.Network), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("git clone -b %s %s /data/repos/%s/reth", cfg.Require("rethGitBranch"), cfg.Require("rethRepoURL"), args.Network),
 			Update:     pulumi.String("cd /data/repos/reth && git pull"),
+			Delete:     pulumi.Sprintf("rm -rf /data/repos/%s/reth", args.Network),
 			Connection: args.Connection,
-		}, pulumi.Parent(component), pulumi.ReplaceOnChanges([]string{"*"}))
+		}, pulumi.Parent(component))
 		if err != nil {
 			ctx.Log.Error("Error cloning repo", nil)
 			return nil, err
