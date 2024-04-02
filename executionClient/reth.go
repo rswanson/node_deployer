@@ -113,6 +113,40 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 				ctx.Log.Error("Error installing reth", nil)
 				return nil, err
 			}
+		} else if args.Network == "sepolia" {
+			rethInstallation, err = remote.NewCommand(ctx, fmt.Sprintf("installReth-%s", args.Network), &remote.CommandArgs{
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/%s/reth/bin/reth --bin reth", args.Connection.User, args.Network),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
+			if err != nil {
+				ctx.Log.Error("Error installing reth", nil)
+				return nil, err
+			}
+			_, err := remote.NewCommand(ctx, fmt.Sprintf("moveAndRename-%s", args.Network), &remote.CommandArgs{
+				Create:     pulumi.Sprintf("mv /root/.cargo/bin/reth /data/bin/reth-%s", args.Network),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{rethInstallation}))
+			if err != nil {
+				ctx.Log.Error("Error moving and renaming reth", nil)
+				return nil, err
+			}
+		} else if args.Network == "holesky" {
+			rethInstallation, err = remote.NewCommand(ctx, fmt.Sprintf("installReth-%s", args.Network), &remote.CommandArgs{
+				Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/%s/reth/bin/reth --bin reth", args.Connection.User, args.Network),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, ownership}))
+			if err != nil {
+				ctx.Log.Error("Error installing reth", nil)
+				return nil, err
+			}
+			_, err := remote.NewCommand(ctx, fmt.Sprintf("moveAndRename-%s", args.Network), &remote.CommandArgs{
+				Create:     pulumi.Sprintf("mv /root/.cargo/bin/reth /data/bin/reth-%s", args.Network),
+				Connection: args.Connection,
+			}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{rethInstallation}))
+			if err != nil {
+				ctx.Log.Error("Error moving and renaming reth", nil)
+				return nil, err
+			}
 		} else {
 
 			rethInstallation, err = remote.NewCommand(ctx, fmt.Sprintf("installReth-%s", args.Network), &remote.CommandArgs{
