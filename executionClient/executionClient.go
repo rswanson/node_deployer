@@ -28,6 +28,7 @@ const (
 	Source     = "source"
 	Binary     = "binary"
 	Docker     = "docker"
+	Kubernetes = "kubernetes"
 )
 
 // NewExecutionClientComponent creates a new instance of the ExecutionClientComponent

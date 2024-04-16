@@ -29,6 +29,8 @@ const (
 	Nimbus     = "nimbus"
 	Source     = "source"
 	Binary     = "binary"
+	Docker     = "docker"
+	Kubernetes = "kubernetes"
 )
 
 // NewConsensusClientComponent creates a new instance of the ConsensusClientComponent
