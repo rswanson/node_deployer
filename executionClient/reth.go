@@ -8,7 +8,6 @@ import (
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
-	storagev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/storage/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 	"github.com/rswanson/node_deployer/utils"
@@ -31,6 +30,8 @@ import (
 //		DataDir:        "/data/mainnet/reth", // path to the data directory
 //	})
 func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientComponentArgs, opts ...pulumi.ResourceOption) (*ExecutionClientComponent, error) {
+	cfg := config.New(ctx, "")
+
 	if args == nil {
 		args = &ExecutionClientComponentArgs{}
 	}
@@ -41,20 +42,16 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		return nil, err
 	}
 
-	// Execute a sequence of commands on the remote server
-	_, err = remote.NewCommand(ctx, fmt.Sprintf("createDataDir-%s", args.Network), &remote.CommandArgs{
-		Create:     pulumi.Sprintf("mkdir -p %s", args.DataDir),
-		Connection: args.Connection,
-	}, pulumi.Parent(component))
-	if err != nil {
-		ctx.Log.Error("Error creating data directory", nil)
-		return nil, err
-	}
-
 	if args.DeploymentType == Source {
-		// Load configuration
-		cfg := config.New(ctx, "")
-
+		// Execute a sequence of commands on the remote server
+		_, err = remote.NewCommand(ctx, fmt.Sprintf("createDataDir-%s", args.Network), &remote.CommandArgs{
+			Create:     pulumi.Sprintf("mkdir -p %s", args.DataDir),
+			Connection: args.Connection,
+		}, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating data directory", nil)
+			return nil, err
+		}
 		// copy start script
 		startScript, err := remote.NewCopyFile(ctx, fmt.Sprintf("copyStartScript-%s", args.Network), &remote.CopyFileArgs{
 			LocalPath:  pulumi.Sprintf("scripts/start_%s_%s.sh", args.Client, args.Network),
@@ -198,8 +195,8 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 	} else if args.DeploymentType == Kubernetes {
 		// Define static string variables
 		rethDataVolumeName := pulumi.String("reth-config-data")
-
-		rethTomlData, err := os.ReadFile("config/reth.toml")
+		jwt := args.ExecutionJwt
+		rethTomlData, err := os.ReadFile(args.ExecutionClientConfigPath)
 		if err != nil {
 			return nil, err
 		}
@@ -214,26 +211,8 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			return nil, err
 		}
 
-		// Create the gp3 storage class
-		_, err = storagev1.NewStorageClass(ctx, "gp3", &storagev1.StorageClassArgs{
-			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("aws-gp3"),
-			},
-			Provisioner:          pulumi.String("ebs.csi.aws.com"),
-			VolumeBindingMode:    pulumi.String("WaitForFirstConsumer"),
-			AllowVolumeExpansion: pulumi.Bool(true),       // Allow volume expansion
-			ReclaimPolicy:        pulumi.String("Delete"), // Automatically delete EBS volume when PVC is deleted
-			Parameters: pulumi.StringMap{
-				"type": pulumi.String("gp3"), // The type of EBS volume
-				"iops": pulumi.String("16000"),
-			},
-		}, pulumi.Parent(component))
-		if err != nil {
-			return nil, err
-		}
-
 		// Define the PersistentVolumeClaim for 1.5TB storage
-		storageSize := pulumi.String("100Gi") // 30Gi size for holesky
+		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "reth-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: rethDataVolumeName,
@@ -245,20 +224,17 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 						"storage": storageSize,
 					},
 				},
-				StorageClassName: pulumi.String("aws-gp3"),
+				StorageClassName: pulumi.String(args.PodStorageClass),
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
 
-		// Get jwt from pulumi secret
-		cfg := config.New(ctx, "")
-		jwt := cfg.RequireSecret("execution-jwt")
 		// Create a secret for the execution jwt
 		secret, err := corev1.NewSecret(ctx, "execution-jwt", &corev1.SecretArgs{
 			StringData: pulumi.StringMap{
-				"jwt.hex": jwt,
+				"jwt.hex": pulumi.String(jwt),
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -286,31 +262,9 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 					Spec: &corev1.PodSpecArgs{
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
-								Name:  pulumi.String("reth"),
-								Image: pulumi.String("ghcr.io/paradigmxyz/reth:latest"),
-								Command: pulumi.StringArray{
-									pulumi.String("reth"),
-									pulumi.String("node"),
-									pulumi.String("--chain"),
-									pulumi.String("holesky"),
-									pulumi.String("--authrpc.jwtsecret"),
-									pulumi.String("/etc/reth/execution-jwt/jwt.hex"),
-									pulumi.String("--authrpc.addr"),
-									pulumi.String("0.0.0.0"),
-									pulumi.String("--authrpc.port"),
-									pulumi.String("8551"),
-									pulumi.String("--datadir"),
-									pulumi.String("/root/.local/share/reth/holesky"),
-									pulumi.String("--metrics"),
-									pulumi.String("0.0.0.0:9001"),
-									pulumi.String("--http"),
-									pulumi.String("--http.addr"),
-									pulumi.String("0.0.0.0"),
-									pulumi.String("--http.api"),
-									pulumi.String("eth,net,trace,txpool,web3,rpc,debug"),
-									// pulumi.String("--config"),
-									// pulumi.String("/etc/reth/reth.toml"),
-								},
+								Name:    pulumi.String("reth"),
+								Image:   pulumi.String("ghcr.io/paradigmxyz/reth:latest"),
+								Command: pulumi.ToStringArray(args.ExecutionClientContainerCommands),
 								Ports: corev1.ContainerPortArray{
 									corev1.ContainerPortArgs{
 										ContainerPort: pulumi.Int(30303),

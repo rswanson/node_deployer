@@ -9,16 +9,22 @@ import (
 
 type ExecutionClientComponent struct {
 	pulumi.ResourceState
-	Client  string
-	Network string
 }
 
 type ExecutionClientComponentArgs struct {
-	Connection     *remote.ConnectionArgs
-	Client         string
-	Network        string
-	DeploymentType string
-	DataDir        string
+	Connection                       *remote.ConnectionArgs
+	Client                           string
+	Network                          string
+	DeploymentType                   string
+	DataDir                          string
+	ExecutionJwt                     string
+	ExecutionClientConfigPath        string
+	PodStorageSize                   string
+	PodStorageClass                  string
+	ExecutionClientImage             string
+	ExecutionClientContainerCommands []string
+	InstanceNumber                   int
+	EnableIngress                    bool
 }
 
 const (
@@ -60,12 +66,8 @@ func NewExecutionClientComponent(ctx *pulumi.Context, name string, args *Executi
 		return nil, err
 	}
 
-	// set the client and network
-	component.Client = args.Client
-	component.Network = args.Network
-
 	// check what client is being requested and call the appropriate component constructor
-	switch component.Client {
+	switch args.Client {
 	case Reth:
 		_, err = NewRethComponent(ctx, "reth", args, pulumi.Parent(component))
 		if err != nil {
