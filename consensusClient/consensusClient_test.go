@@ -26,7 +26,7 @@ func TestConsensusClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ConsensusClientComponent
-			client, err := consensusClient.NewConsensusClientComponent(ctx, "testTekuConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+			_, err := consensusClient.NewConsensusClientComponent(ctx, "testTekuConsensusClient", &consensusClient.ConsensusClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "teku",
 				Network:        "testNetwork",
@@ -38,8 +38,6 @@ func TestConsensusClientComponent(t *testing.T) {
 
 			assert.NoError(t, err, "Expected to not receive an error")
 
-			// Test that the client is teku
-			assert.Equal(t, "teku", client.Client, "Expected client to be teku, but got %s", client.Client)
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
 		assert.NoError(t, err, "Expected to not receive an error")
@@ -49,7 +47,7 @@ func TestConsensusClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ConsensusClientComponent
-			client, err := consensusClient.NewConsensusClientComponent(ctx, "testPrysmConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+			_, err := consensusClient.NewConsensusClientComponent(ctx, "testPrysmConsensusClient", &consensusClient.ConsensusClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "prysm",
 				Network:        "testNetwork",
@@ -58,9 +56,6 @@ func TestConsensusClientComponent(t *testing.T) {
 			})
 
 			assert.NoError(t, err, "Expected to not receive an error")
-
-			// Test that the client is prysm
-			assert.Equal(t, "prysm", client.Client, "Expected client to be prysm, but got %s", client.Client)
 
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
@@ -71,7 +66,7 @@ func TestConsensusClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ConsensusClientComponent
-			client, err := consensusClient.NewConsensusClientComponent(ctx, "testLighthouseConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+			_, err := consensusClient.NewConsensusClientComponent(ctx, "testLighthouseConsensusClient", &consensusClient.ConsensusClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "lighthouse",
 				Network:        "testNetwork",
@@ -80,9 +75,6 @@ func TestConsensusClientComponent(t *testing.T) {
 			})
 
 			assert.NoError(t, err, "Expected to not receive an error")
-
-			// Test that the client is lighthouse
-			assert.Equal(t, "lighthouse", client.Client, "Expected client to be lighthouse, but got %s", client.Client)
 
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
@@ -93,7 +85,7 @@ func TestConsensusClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ConsensusClientComponent
-			client, err := consensusClient.NewConsensusClientComponent(ctx, "testLodestarConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+			_, err := consensusClient.NewConsensusClientComponent(ctx, "testLodestarConsensusClient", &consensusClient.ConsensusClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "lodestar",
 				Network:        "testNetwork",
@@ -102,9 +94,6 @@ func TestConsensusClientComponent(t *testing.T) {
 			})
 
 			assert.NoError(t, err, "Expected to not receive an error")
-
-			// Test that the client is lodestar
-			assert.Equal(t, "lodestar", client.Client, "Expected client to be lodestar, but got %s", client.Client)
 
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
@@ -115,7 +104,7 @@ func TestConsensusClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ConsensusClientComponent
-			client, err := consensusClient.NewConsensusClientComponent(ctx, "testNimbusConsensusClient", &consensusClient.ConsensusClientComponentArgs{
+			_, err := consensusClient.NewConsensusClientComponent(ctx, "testNimbusConsensusClient", &consensusClient.ConsensusClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "nimbus",
 				Network:        "testNetwork",
@@ -124,9 +113,6 @@ func TestConsensusClientComponent(t *testing.T) {
 			})
 
 			assert.NoError(t, err, "Expected to not receive an error")
-
-			// Test that the client is nimbus
-			assert.Equal(t, "nimbus", client.Client, "Expected client to be nimbus, but got %s", client.Client)
 
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))

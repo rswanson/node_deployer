@@ -195,7 +195,6 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 	} else if args.DeploymentType == Kubernetes {
 		// Define static string variables
 		rethDataVolumeName := pulumi.String("reth-config-data")
-		jwt := args.ExecutionJwt
 		rethTomlData, err := os.ReadFile(args.ExecutionClientConfigPath)
 		if err != nil {
 			return nil, err
@@ -234,7 +233,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		// Create a secret for the execution jwt
 		secret, err := corev1.NewSecret(ctx, "execution-jwt", &corev1.SecretArgs{
 			StringData: pulumi.StringMap{
-				"jwt.hex": pulumi.String(jwt),
+				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -263,7 +262,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
 								Name:    pulumi.String("reth"),
-								Image:   pulumi.String("ghcr.io/paradigmxyz/reth:latest"),
+								Image:   pulumi.String(args.ExecutionClientImage),
 								Command: pulumi.ToStringArray(args.ExecutionClientContainerCommands),
 								Ports: corev1.ContainerPortArray{
 									corev1.ContainerPortArgs{

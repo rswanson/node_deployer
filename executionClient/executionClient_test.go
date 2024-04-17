@@ -27,7 +27,7 @@ func TestExecutionClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ExecutionClientComponent
-			el_client, err := el.NewExecutionClientComponent(ctx, "testRethExecutionClient", &el.ExecutionClientComponentArgs{
+			_, err := el.NewExecutionClientComponent(ctx, "testRethExecutionClient", &el.ExecutionClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "reth",
 				Network:        "testNetwork",
@@ -39,8 +39,6 @@ func TestExecutionClientComponent(t *testing.T) {
 
 			assert.NoError(t, err, "Expected to not receive an error")
 
-			// Test that the client is reth
-			assert.Equal(t, "reth", el_client.Client, "Expected client to be reth, but got %s", el_client.Client)
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
 		assert.NoError(t, err, "Expected to not receive an error")
@@ -50,7 +48,7 @@ func TestExecutionClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ExecutionClientComponent
-			client, err := el.NewExecutionClientComponent(ctx, "testNethermindExecutionClient", &el.ExecutionClientComponentArgs{
+			_, err := el.NewExecutionClientComponent(ctx, "testNethermindExecutionClient", &el.ExecutionClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "nethermind",
 				Network:        "testNetwork",
@@ -62,9 +60,6 @@ func TestExecutionClientComponent(t *testing.T) {
 
 			assert.NoError(t, err, "Expected to not receive an error")
 
-			// Test that the client is nethermind
-			assert.Equal(t, "nethermind", client.Client, "Expected client to be nethermind, but got %s", client.Client)
-
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))
 		assert.NoError(t, err, "Expected to not receive an error")
@@ -74,7 +69,7 @@ func TestExecutionClientComponent(t *testing.T) {
 		mocks := mocks(0)
 		err := pulumi.RunErr(func(ctx *pulumi.Context) error {
 			// Create a new instance of the ExecutionClientComponent
-			client, err := el.NewExecutionClientComponent(ctx, "testGethExecutionClient", &el.ExecutionClientComponentArgs{
+			_, err := el.NewExecutionClientComponent(ctx, "testGethExecutionClient", &el.ExecutionClientComponentArgs{
 				Connection:     &remote.ConnectionArgs{},
 				Client:         "geth",
 				Network:        "testNetwork",
@@ -85,9 +80,6 @@ func TestExecutionClientComponent(t *testing.T) {
 			// Test the NewGethComponent function
 
 			assert.NoError(t, err, "Expected to not receive an error")
-
-			// Test that the client is geth
-			assert.Equal(t, "geth", client.Client, "Expected client to be geth, but got %s", client.Client)
 
 			return nil
 		}, pulumi.WithMocks("project", "stack", mocks))

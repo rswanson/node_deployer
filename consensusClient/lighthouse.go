@@ -137,7 +137,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 	} else if args.DeploymentType == Docker {
 		ctx.Log.Info("Docker deployment not yet implemented", nil)
 	} else if args.DeploymentType == Kubernetes {
-		storageSize := pulumi.String("150Gi") // 30Gi size for holesky
+		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "lighthouse-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lighthouse-data"),
@@ -149,20 +149,17 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 						"storage": storageSize,
 					},
 				},
-				StorageClassName: pulumi.String("aws-gp3"),
+				StorageClassName: pulumi.String(args.PodStorageClass),
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
 
-		// Get jwt from pulumi secret
-		cfg := config.New(ctx, "")
-		jwt := cfg.RequireSecret("execution-jwt")
 		// Create a secret for the execution jwt
 		secret, err := corev1.NewSecret(ctx, "execution-jwt", &corev1.SecretArgs{
 			StringData: pulumi.StringMap{
-				"jwt.hex": jwt,
+				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -170,7 +167,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		}
 
 		// Create a ConfigMap with the content of lighthouse.toml
-		lighthouseTomlData, err := os.ReadFile("config/lighthouse.toml")
+		lighthouseTomlData, err := os.ReadFile(args.ConsensusClientConfigPath)
 		if err != nil {
 			return nil, err
 		}
@@ -204,25 +201,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 					Spec: &corev1.PodSpecArgs{
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
-								Name:  pulumi.String("lighthouse"),
-								Image: pulumi.String("sigp/lighthouse:latest"),
-								Command: pulumi.StringArray{
-									pulumi.String("lighthouse"),
-									pulumi.String("bn"),
-									pulumi.String("--datadir"),
-									pulumi.String("/root/.local/share/lighthouse/holesky"),
-									pulumi.String("--network"),
-									pulumi.String("holesky"),
-									pulumi.String("--checkpoint-sync-url"),
-									pulumi.String("https://holesky.checkpoint.sigp.io/"),
-									pulumi.String("--execution-jwt"),
-									pulumi.String("/secrets/jwt.hex"),
-									pulumi.String("--http"),
-									pulumi.String("--execution-endpoint"),
-									pulumi.String("http://reth-internal-service.default:8551"),
-									pulumi.String("--disable-deposit-contract-sync"),
-									pulumi.String("--metrics"),
-								},
+								Name:    pulumi.String("lighthouse"),
+								Image:   pulumi.String(args.ConsensusClientImage),
+								Command: pulumi.ToStringArray(args.ConsensusClientContainerCommands),
 								Ports: corev1.ContainerPortArray{
 									corev1.ContainerPortArgs{
 										ContainerPort: pulumi.Int(9000),
