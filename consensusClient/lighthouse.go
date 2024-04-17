@@ -40,19 +40,19 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		return nil, err
 	}
 
-	// Execute a sequence of commands on the remote server
-	_, err = remote.NewCommand(ctx, fmt.Sprintf("createDataDir-%s", args.Client), &remote.CommandArgs{
-		Create:     pulumi.Sprintf("mkdir -p %s", args.DataDir),
-		Connection: args.Connection,
-	}, pulumi.Parent(component))
-	if err != nil {
-		ctx.Log.Error("Error creating data directory", nil)
-		return nil, err
-	}
-
 	if args.DeploymentType == Source {
 		// Load configuration
 		cfg := config.New(ctx, "")
+
+		// Execute a sequence of commands on the remote server
+		_, err = remote.NewCommand(ctx, fmt.Sprintf("createDataDir-%s", args.Client), &remote.CommandArgs{
+			Create:     pulumi.Sprintf("mkdir -p %s", args.DataDir),
+			Connection: args.Connection,
+		}, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating data directory", nil)
+			return nil, err
+		}
 
 		// clone repo
 		repo, err := remote.NewCommand(ctx, fmt.Sprintf("cloneRepo-%s", args.Client), &remote.CommandArgs{
