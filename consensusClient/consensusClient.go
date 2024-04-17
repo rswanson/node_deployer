@@ -8,17 +8,23 @@ import (
 )
 
 type ConsensusClientComponent struct {
-	Client  string
-	Network string
 	pulumi.ResourceState
 }
 
 type ConsensusClientComponentArgs struct {
-	Connection     *remote.ConnectionArgs
-	Client         string
-	Network        string
-	DeploymentType string
-	DataDir        string
+	Connection                       *remote.ConnectionArgs
+	Client                           string
+	Network                          string
+	DeploymentType                   string
+	DataDir                          string
+	ConsensusClientConfigPath        string
+	ConsensusClientImage             string
+	ConsensusClientContainerCommands []string
+	InstanceNumber                   int
+	EnableRpcIngress                 bool
+	PodStorageClass                  string
+	PodStorageSize                   string
+	ExecutionJwt                     string
 }
 
 const (
@@ -29,6 +35,8 @@ const (
 	Nimbus     = "nimbus"
 	Source     = "source"
 	Binary     = "binary"
+	Docker     = "docker"
+	Kubernetes = "kubernetes"
 )
 
 // NewConsensusClientComponent creates a new instance of the ConsensusClientComponent
@@ -60,11 +68,7 @@ func NewConsensusClientComponent(ctx *pulumi.Context, name string, args *Consens
 		return nil, err
 	}
 
-	// set the client and network
-	component.Client = args.Client
-	component.Network = args.Network
-
-	switch component.Client {
+	switch args.Client {
 	case Teku:
 		_, err = NewTekuComponent(ctx, "teku", args, pulumi.Parent(component))
 		if err != nil {
