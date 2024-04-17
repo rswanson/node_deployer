@@ -263,7 +263,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 					},
 				},
 			},
-		})
+		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
@@ -285,7 +285,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 					},
 				},
 			},
-		})
+		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
