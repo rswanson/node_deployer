@@ -296,6 +296,16 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 										MountPath: pulumi.String("/etc/reth/execution-jwt"),
 									},
 								},
+								Resources: &corev1.ResourceRequirementsArgs{
+									Limits: pulumi.StringMap{
+										"cpu":    pulumi.String("4"),
+										"memory": pulumi.String("16Gi"),
+									},
+									Requests: pulumi.StringMap{
+										"cpu":    pulumi.String("2"),
+										"memory": pulumi.String("8Gi"),
+									},
+								},
 							},
 						},
 						Volumes: corev1.VolumeArray{

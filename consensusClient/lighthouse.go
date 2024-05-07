@@ -237,6 +237,16 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 										MountPath: pulumi.String("/secrets"),
 									},
 								},
+								Resources: &corev1.ResourceRequirementsArgs{
+									Limits: pulumi.StringMap{
+										"cpu":    pulumi.String("8"),
+										"memory": pulumi.String("32Gi"),
+									},
+									Requests: pulumi.StringMap{
+										"cpu":    pulumi.String("4"),
+										"memory": pulumi.String("24Gi"),
+									},
+								},
 							},
 						},
 						DnsPolicy: pulumi.String("ClusterFirst"),
