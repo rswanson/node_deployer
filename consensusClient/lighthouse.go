@@ -64,15 +64,6 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			return nil, err
 		}
 
-		dependencies, err := remote.NewCommand(ctx, fmt.Sprintf("installDependencies-%s", args.Client), &remote.CommandArgs{
-			Create:     pulumi.Sprintf("apt-get update && apt install -y git gcc g++ make cmake pkg-config llvm-dev libclang-dev clang"),
-			Connection: args.Connection,
-		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo}))
-		if err != nil {
-			ctx.Log.Error("Error installing dependencies", nil)
-			return nil, err
-		}
-
 		// install rust toolchain
 		rustToolchain, err := remote.NewCommand(ctx, fmt.Sprintf("installRust-%s", args.Client), &remote.CommandArgs{
 			Create:     pulumi.String("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"),
