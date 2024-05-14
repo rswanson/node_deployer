@@ -78,7 +78,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		buildClient, err := remote.NewCommand(ctx, fmt.Sprintf("buildConsensusClient-%s", args.Client), &remote.CommandArgs{
 			Create:     pulumi.Sprintf("/%s/.cargo/bin/cargo install --locked --path /data/repos/%s/lighthouse/lighthouse --bin lighthouse --root /data", args.Connection.User, args.Network),
 			Connection: args.Connection,
-		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain, dependencies}))
+		}, pulumi.Parent(component), pulumi.DependsOn([]pulumi.Resource{repo, rustToolchain}))
 		if err != nil {
 			ctx.Log.Error("Error building consensus client", nil)
 			return nil, err
