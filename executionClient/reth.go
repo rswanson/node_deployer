@@ -205,6 +205,13 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			Data: pulumi.StringMap{
 				"reth.toml": pulumi.String(string(rethTomlData)),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("reth-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("reth-config"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -215,6 +222,10 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "reth-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: rethDataVolumeName,
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    rethDataVolumeName,
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -235,6 +246,13 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -244,6 +262,11 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 		_, err = appsv1.NewStatefulSet(ctx, "reth-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("reth"),
+				Labels: pulumi.StringMap{
+					"app":                       pulumi.String("reth-set"),
+					"app.kubernetes.io/name":    pulumi.String("reth-set"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
@@ -255,7 +278,9 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("reth"),
+							"app":                       pulumi.String("reth"),
+							"app.kubernetes.io/name":    pulumi.String("reth"),
+							"app.kubernetes.io/part-of": pulumi.String("reth"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
@@ -353,6 +378,13 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 					},
 				},
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("reth-p2pnet-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("reth-p2pnet-service"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -376,6 +408,10 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			},
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("reth-internal-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("reth-internal-service"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -396,6 +432,10 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			},
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("reth-rpc-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("reth-rpc-service"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
