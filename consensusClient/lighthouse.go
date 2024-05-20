@@ -132,6 +132,10 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "lighthouse-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lighthouse-data"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("lighthouse-data"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -152,6 +156,13 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -166,6 +177,13 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			Data: pulumi.StringMap{
 				"lighthouse.toml": pulumi.String(string(lighthouseTomlData)),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("lighthouse-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("lighthouse-config"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -175,6 +193,10 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		_, err = appsv1.NewStatefulSet(ctx, "lighthouse-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lighthouse"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("lighthouse-set"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
@@ -186,7 +208,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("lighthouse"),
+							"app":                       pulumi.String("lighthouse"),
+							"app.kubernetes.io/name":    pulumi.String("lighthouse"),
+							"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
@@ -221,7 +245,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 									},
 									corev1.VolumeMountArgs{
 										Name:      pulumi.String("lighthouse-data"),
-										MountPath: pulumi.String("/root/.local/share/lighthouse/holesky"),
+										MountPath: pulumi.String("/root/.lighthouse/holesky"),
 									},
 									corev1.VolumeMountArgs{
 										Name:      pulumi.String("execution-jwt"),
@@ -230,12 +254,12 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 								},
 								Resources: &corev1.ResourceRequirementsArgs{
 									Limits: pulumi.StringMap{
-										"cpu":    pulumi.String("8"),
-										"memory": pulumi.String("32Gi"),
+										"cpu":    pulumi.String("4"),
+										"memory": pulumi.String("16Gi"),
 									},
 									Requests: pulumi.StringMap{
 										"cpu":    pulumi.String("4"),
-										"memory": pulumi.String("24Gi"),
+										"memory": pulumi.String("16Gi"),
 									},
 								},
 							},
@@ -284,6 +308,13 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 						Protocol: pulumi.String("UDP"),
 						Name:     pulumi.String("p2p-udp"),
 					},
+				},
+			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("lighthouse-p2p-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("lighthouse-p2p-service"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
 		}, pulumi.Parent(component))

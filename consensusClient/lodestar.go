@@ -141,6 +141,10 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "lodestar-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lodestar-data"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name": pulumi.String("lodestar-data"),
+					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -161,6 +165,13 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -175,6 +186,13 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Data: pulumi.StringMap{
 				"lodestar.toml": pulumi.String(string(lodestarTomlData)),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("lodestar-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name": pulumi.String("lodestar-config"),
+					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -184,6 +202,10 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 		_, err = appsv1.NewStatefulSet(ctx, "lodestar-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lodestar"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name": pulumi.String("lodestar-set"),
+					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
@@ -196,6 +218,8 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
 							"app": pulumi.String("lodestar"),
+							"app.kubernetes.io/name": pulumi.String("lodestar"),
+							"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
@@ -285,6 +309,12 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 					},
 				},
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("lodestar-p2p-service")
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name": pulumi.String("lodestar-p2p-service"),
+					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+				},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
