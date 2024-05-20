@@ -142,7 +142,7 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lodestar-data"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("lodestar-data"),
+					"app.kubernetes.io/name":    pulumi.String("lodestar-data"),
 					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 				},
 			},
@@ -168,7 +168,7 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("execution-jwt"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
 					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 				},
 			},
@@ -189,7 +189,7 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lodestar-config"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("lodestar-config"),
+					"app.kubernetes.io/name":    pulumi.String("lodestar-config"),
 					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 				},
 			},
@@ -203,7 +203,7 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("lodestar"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("lodestar-set"),
+					"app.kubernetes.io/name":    pulumi.String("lodestar-set"),
 					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 				},
 			},
@@ -217,8 +217,8 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("lodestar"),
-							"app.kubernetes.io/name": pulumi.String("lodestar"),
+							"app":                       pulumi.String("lodestar"),
+							"app.kubernetes.io/name":    pulumi.String("lodestar"),
 							"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 						},
 					},
@@ -310,11 +310,12 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 				},
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lodestar-p2p-service")
+				Name: pulumi.String("lodestar-p2p-service"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("lodestar-p2p-service"),
+					"app.kubernetes.io/name":    pulumi.String("lodestar-p2p-service"),
 					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
 				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
