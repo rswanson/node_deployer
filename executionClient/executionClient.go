@@ -19,6 +19,7 @@ type ExecutionClientComponentArgs struct {
 	DataDir                          string
 	ExecutionJwt                     string
 	ExecutionClientConfigPath        string
+	Environment                      map[string]string
 	PodStorageSize                   string
 	PodStorageClass                  string
 	ExecutionClientImage             string

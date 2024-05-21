@@ -258,6 +258,20 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			return nil, err
 		}
 
+		rethEnvConfigMap, err := corev1.NewConfigMap(ctx, "reth-env-config", &corev1.ConfigMapArgs{
+			Data: pulumi.ToStringMap(args.Environment),
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("reth-env-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("reth-env-config"),
+					"app.kubernetes.io/part-of": pulumi.String("reth"),
+				},
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+
 		// Define the StatefulSet for the 'reth' container with a configmap volume and a data persistent volume
 		_, err = appsv1.NewStatefulSet(ctx, "reth-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
@@ -289,6 +303,14 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 								Name:    pulumi.String("reth"),
 								Image:   pulumi.String(args.ExecutionClientImage),
 								Command: pulumi.ToStringArray(args.ExecutionClientContainerCommands),
+								EnvFrom: corev1.EnvFromSourceArray{
+									corev1.EnvFromSourceArgs{
+										ConfigMapRef: &corev1.ConfigMapEnvSourceArgs{
+											Name:     pulumi.String("reth-env-config"),
+											Optional: pulumi.Bool(true),
+										},
+									},
+								},
 								Ports: corev1.ContainerPortArray{
 									corev1.ContainerPortArgs{
 										ContainerPort: pulumi.Int(30303),
@@ -356,7 +378,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 					},
 				},
 			},
-		}, pulumi.Parent(component))
+		}, pulumi.DependsOn([]pulumi.Resource{rethEnvConfigMap}), pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
