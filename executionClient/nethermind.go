@@ -149,6 +149,13 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 			Data: pulumi.StringMap{
 				"nethermind.toml": pulumi.String(string(nethermindTomlData)),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("nethermind-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind-config"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -159,6 +166,10 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "nethermind-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: nethermindDataVolumeName,
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind-data"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -179,6 +190,13 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -188,6 +206,10 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 		_, err = appsv1.NewStatefulSet(ctx, "nethermind-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("nethermind"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind-set"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
@@ -199,7 +221,9 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("nethermind"),
+							"app":                       pulumi.String("nethermind"),
+							"app.kubernetes.io/name":    pulumi.String("nethermind"),
+							"app.kubernetes.io/part-of": pulumi.String("nethermind"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
@@ -287,6 +311,13 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 					},
 				},
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("nethermind-p2pnet-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind-p2pnet-service"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -310,6 +341,10 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 			},
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("nethermind-internal-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind-internal-service"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
@@ -330,6 +365,10 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 			},
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("nethermind-rpc-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("nethermind"),
+					"app.kubernetes.io/part-of": pulumi.String("nethermind"),
+				},
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
