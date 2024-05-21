@@ -142,6 +142,10 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "prysm-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("prysm-data"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("prysm-data"),
+					"app.kubernetes.io/part-of": pulumi.String("prysm"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -162,6 +166,13 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("prysm"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -176,6 +187,13 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 			Data: pulumi.StringMap{
 				"prysm.toml": pulumi.String(string(prysmTomlData)),
 			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("prysm-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("prysm-config"),
+					"app.kubernetes.io/part-of": pulumi.String("prysm"),
+				},
+			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
@@ -185,6 +203,10 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 		_, err = appsv1.NewStatefulSet(ctx, "prysm-set", &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("prysm"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("prysm-set"),
+					"app.kubernetes.io/part-of": pulumi.String("prysm"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
@@ -196,7 +218,9 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("prysm"),
+							"app":                       pulumi.String("prysm"),
+							"app.kubernetes.io/name":    pulumi.String("prysm"),
+							"app.kubernetes.io/part-of": pulumi.String("prysm"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
@@ -284,6 +308,13 @@ func NewPrysmComponent(ctx *pulumi.Context, name string, args *ConsensusClientCo
 						Protocol: pulumi.String("UDP"),
 						Name:     pulumi.String("p2p-udp"),
 					},
+				},
+			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("prysm-p2p-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("prysm-p2p-service"),
+					"app.kubernetes.io/part-of": pulumi.String("prysm"),
 				},
 			},
 		}, pulumi.Parent(component))

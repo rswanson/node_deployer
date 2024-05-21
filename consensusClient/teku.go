@@ -138,9 +138,13 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 
 	} else if args.DeploymentType == Kubernetes {
 		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
-		_, err = corev1.NewPersistentVolumeClaim(ctx, "lighthouse-data", &corev1.PersistentVolumeClaimArgs{
+		_, err = corev1.NewPersistentVolumeClaim(ctx, "teku-data", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse-data"),
+				Name: pulumi.String("teku-data"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("teku-data"),
+					"app.kubernetes.io/part-of": pulumi.String("teku"),
+				},
 			},
 			Spec: &corev1.PersistentVolumeClaimSpecArgs{
 				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
@@ -161,47 +165,67 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
-		}, pulumi.Parent(component))
-		if err != nil {
-			return nil, err
-		}
-
-		// Create a ConfigMap with the content of lighthouse.toml
-		lighthouseTomlData, err := os.ReadFile(args.ConsensusClientConfigPath)
-		if err != nil {
-			return nil, err
-		}
-		lighthouseConfigData, err := corev1.NewConfigMap(ctx, "lighthouse-config", &corev1.ConfigMapArgs{
-			Data: pulumi.StringMap{
-				"lighthouse.toml": pulumi.String(string(lighthouseTomlData)),
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("execution-jwt"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
+					"app.kubernetes.io/part-of": pulumi.String("teku"),
+				},
 			},
 		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
 
-		// Create a stateful set to run a lighthouse node with a configmap volume and a data persistent volume
-		_, err = appsv1.NewStatefulSet(ctx, "lighthouse-set", &appsv1.StatefulSetArgs{
+		// Create a ConfigMap with the content of teku.toml
+		tekuTomlData, err := os.ReadFile(args.ConsensusClientConfigPath)
+		if err != nil {
+			return nil, err
+		}
+		tekuConfigData, err := corev1.NewConfigMap(ctx, "teku-config", &corev1.ConfigMapArgs{
+			Data: pulumi.StringMap{
+				"teku.toml": pulumi.String(string(tekuTomlData)),
+			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse"),
+				Name: pulumi.String("teku-config"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("teku-config"),
+					"app.kubernetes.io/part-of": pulumi.String("teku"),
+				},
+			},
+		}, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
+
+		// Create a stateful set to run a teku node with a configmap volume and a data persistent volume
+		_, err = appsv1.NewStatefulSet(ctx, "teku-set", &appsv1.StatefulSetArgs{
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("teku"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("teku-set"),
+					"app.kubernetes.io/part-of": pulumi.String("teku"),
+				},
 			},
 			Spec: &appsv1.StatefulSetSpecArgs{
 				Replicas: pulumi.Int(1),
 				Selector: &metav1.LabelSelectorArgs{
 					MatchLabels: pulumi.StringMap{
-						"app": pulumi.String("lighthouse"),
+						"app": pulumi.String("teku"),
 					},
 				},
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app": pulumi.String("lighthouse"),
+							"app":                       pulumi.String("teku"),
+							"app.kubernetes.io/name":    pulumi.String("teku"),
+							"app.kubernetes.io/part-of": pulumi.String("teku"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
-								Name:    pulumi.String("lighthouse"),
+								Name:    pulumi.String("teku"),
 								Image:   pulumi.String(args.ConsensusClientImage),
 								Command: pulumi.ToStringArray(args.ConsensusClientContainerCommands),
 								Ports: corev1.ContainerPortArray{
@@ -225,12 +249,12 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("lighthouse-config"),
-										MountPath: pulumi.String("/etc/lighthouse"),
+										Name:      pulumi.String("teku-config"),
+										MountPath: pulumi.String("/etc/teku"),
 									},
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("lighthouse-data"),
-										MountPath: pulumi.String("/root/.local/share/lighthouse/holesky"),
+										Name:      pulumi.String("teku-data"),
+										MountPath: pulumi.String("/root/.local/share/teku/holesky"),
 									},
 									corev1.VolumeMountArgs{
 										Name:      pulumi.String("execution-jwt"),
@@ -242,15 +266,15 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 						DnsPolicy: pulumi.String("ClusterFirst"),
 						Volumes: corev1.VolumeArray{
 							corev1.VolumeArgs{
-								Name: pulumi.String("lighthouse-config"),
+								Name: pulumi.String("teku-config"),
 								ConfigMap: &corev1.ConfigMapVolumeSourceArgs{
-									Name: lighthouseConfigData.Metadata.Name(),
+									Name: tekuConfigData.Metadata.Name(),
 								},
 							},
 							corev1.VolumeArgs{
-								Name: pulumi.String("lighthouse-data"),
+								Name: pulumi.String("teku-data"),
 								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSourceArgs{
-									ClaimName: pulumi.String("lighthouse-data"),
+									ClaimName: pulumi.String("teku-data"),
 								},
 							},
 							corev1.VolumeArgs{
@@ -268,10 +292,10 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 			return nil, err
 		}
 
-		// Create ingress for lighthouse p2p traffic on port 9000
-		_, err = corev1.NewService(ctx, "lighthouse-p2p-service", &corev1.ServiceArgs{
+		// Create ingress for teku p2p traffic on port 9000
+		_, err = corev1.NewService(ctx, "teku-p2p-service", &corev1.ServiceArgs{
 			Spec: &corev1.ServiceSpecArgs{
-				Selector: pulumi.StringMap{"app": pulumi.String("lighthouse")},
+				Selector: pulumi.StringMap{"app": pulumi.String("teku")},
 				Type:     pulumi.String("NodePort"),
 				Ports: corev1.ServicePortArray{
 					corev1.ServicePortArgs{
@@ -283,6 +307,13 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 						Protocol: pulumi.String("UDP"),
 						Name:     pulumi.String("p2p-udp"),
 					},
+				},
+			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("teku-p2p-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("teku-p2p-service"),
+					"app.kubernetes.io/part-of": pulumi.String("teku"),
 				},
 			},
 		}, pulumi.Parent(component))
