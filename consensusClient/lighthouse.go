@@ -322,6 +322,31 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			return nil, err
 		}
 
+		// create the metrics service
+		_, err = corev1.NewService(ctx, "lighthouse-metrics-service", &corev1.ServiceArgs{
+			Spec: &corev1.ServiceSpecArgs{
+				Selector: pulumi.StringMap{"app": pulumi.String("lighthouse")},
+				Type:     pulumi.String("ClusterIP"),
+				Ports: corev1.ServicePortArray{
+
+					corev1.ServicePortArgs{
+						Port: pulumi.Int(5054),
+						Name: pulumi.String("metrics"),
+					},
+				},
+			},
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("lighthouse-metrics-service"),
+				Labels: pulumi.StringMap{
+					"app.kubernetes.io/name":    pulumi.String("lighthouse-metrics-service"),
+					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+				},
+			},
+		}, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	return component, nil
