@@ -328,6 +328,12 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 									corev1.ContainerPortArgs{
 										ContainerPort: pulumi.Int(8551),
 									},
+									corev1.ContainerPortArgs{
+										ContainerPort: pulumi.Int(8546),
+									},
+									corev1.ContainerPortArgs{
+										ContainerPort: pulumi.Int(8547),
+									},
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									corev1.VolumeMountArgs{
