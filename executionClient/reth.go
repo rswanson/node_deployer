@@ -249,8 +249,7 @@ func NewRethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("execution-jwt"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
-					"app.kubernetes.io/part-of": pulumi.String("reth"),
+					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
 				},
 			},
 		}, pulumi.Parent(component))
