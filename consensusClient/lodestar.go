@@ -168,8 +168,7 @@ func NewLodestarComponent(ctx *pulumi.Context, name string, args *ConsensusClien
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("execution-jwt"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
-					"app.kubernetes.io/part-of": pulumi.String("lodestar"),
+					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
 				},
 			},
 		}, pulumi.Parent(component))

@@ -159,8 +159,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("execution-jwt"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("execution-jwt"),
-					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
 				},
 			},
 		}, pulumi.Parent(component))
