@@ -280,7 +280,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 			return nil, err
 		}
 
-		rethEnvConfigMap, err := corev1.NewConfigMap(ctx, "reth-env-config", &corev1.ConfigMapArgs{
+		rethEnvConfigMap, err := corev1.NewConfigMap(ctx, fmt.Sprintf("%s-env-config", args.Name), &corev1.ConfigMapArgs{
 			Data: pulumi.ToStringMap(args.Environment),
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("reth-env-config"),
