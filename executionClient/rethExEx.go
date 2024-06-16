@@ -194,7 +194,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		}
 	} else if args.DeploymentType == Kubernetes {
 		// Define static string variables
-		rethDataVolumeName := pulumi.Sprintf("reth-config-data", args.Name)
+		rethDataVolumeName := pulumi.String("reth-config-data")
 		rethTomlData, err := os.ReadFile(args.ExecutionClientConfigPath)
 		if err != nil {
 			return nil, err
