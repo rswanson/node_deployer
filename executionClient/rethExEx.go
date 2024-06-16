@@ -244,7 +244,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		// Define PersistentVolumeClaim for the execution extension local storage/db
 		_, err = corev1.NewPersistentVolumeClaim(ctx, "exex-persistent-storage", &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.Sprintf("exex-persistent-storage", args.Name),
+				Name: pulumi.String("exex-persistent-storage"),
 				Labels: pulumi.StringMap{
 					"app.kubernetes.io/name":    pulumi.Sprintf("%s-persistent-storage", args.Name),
 					"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
