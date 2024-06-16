@@ -325,15 +325,6 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 								Name:    pulumi.String("reth"),
 								Image:   pulumi.String(args.ExecutionClientImage),
 								Command: pulumi.ToStringArray(args.ExecutionClientContainerCommands),
-								LivenessProbe: &corev1.ProbeArgs{
-									InitialDelaySeconds: pulumi.Int(30),
-									PeriodSeconds:       pulumi.Int(30),
-									HttpGet: &corev1.HTTPGetActionArgs{
-										Host: pulumi.String("localhost"),
-										Port: pulumi.Int(9001),
-										Path: pulumi.String("/metrics"),
-									},
-								},
 								EnvFrom: corev1.EnvFromSourceArray{
 									corev1.EnvFromSourceArgs{
 										ConfigMapRef: &corev1.ConfigMapEnvSourceArgs{
