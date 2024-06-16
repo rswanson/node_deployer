@@ -8,6 +8,7 @@ import (
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
+	"github.com/pulumi/pulumi/sdk/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 	"github.com/rswanson/node_deployer/utils"
@@ -283,7 +284,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		rethEnvConfigMap, err := corev1.NewConfigMap(ctx, fmt.Sprintf("%s-env-config", args.Name), &corev1.ConfigMapArgs{
 			Data: pulumi.ToStringMap(args.Environment),
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("reth-env-config"),
+				Name: pulumi.Sprintf("%s-env-config", args.Name),
 				Labels: pulumi.StringMap{
 					"app.kubernetes.io/name":    pulumi.Sprintf("%s-env-config", args.Name),
 					"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
