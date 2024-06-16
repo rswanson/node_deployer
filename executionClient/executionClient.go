@@ -24,12 +24,15 @@ type ExecutionClientComponentArgs struct {
 	PodStorageClass                  string
 	ExecutionClientImage             string
 	ExecutionClientContainerCommands []string
+	ExExStorageSize                  string
 	InstanceNumber                   int
 	EnableIngress                    bool
+	Name                             string
 }
 
 const (
 	Reth       = "reth"
+	RethExEx   = "reth-exex"
 	Nethermind = "nethermind"
 	Geth       = "geth"
 	Source     = "source"
@@ -85,6 +88,12 @@ func NewExecutionClientComponent(ctx *pulumi.Context, name string, args *Executi
 		_, err = NewGethComponent(ctx, "geth", args, pulumi.Parent(component))
 		if err != nil {
 			ctx.Log.Error("Error creating geth component", nil)
+			return nil, err
+		}
+	case RethExEx:
+		_, err = NewRethExExComponent(ctx, "reth-exex", args, pulumi.Parent(component))
+		if err != nil {
+			ctx.Log.Error("Error creating reth-exex component", nil)
 			return nil, err
 		}
 	}
