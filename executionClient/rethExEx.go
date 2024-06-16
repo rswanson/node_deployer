@@ -488,7 +488,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		}
 
 		// Create ingress for the reth rpc traffic on port 8545
-		_, err = corev1.NewService(ctx, fmt.Sprintf("reth-rpc-service", args.Name), &corev1.ServiceArgs{
+		_, err = corev1.NewService(ctx, fmt.Sprintf("%s-rpc-service", args.Name), &corev1.ServiceArgs{
 			Spec: &corev1.ServiceSpecArgs{
 				Selector: pulumi.StringMap{"app": pulumi.Sprintf("%s", args.Name)},
 				Type:     pulumi.String("NodePort"),
