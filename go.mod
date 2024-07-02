@@ -3,7 +3,7 @@ module github.com/rswanson/node_deployer
 go 1.22.0
 
 require (
-	github.com/pulumi/pulumi-command/sdk v0.11.1
+	github.com/pulumi/pulumi-command/sdk v1.0.0
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.14.0
 	github.com/pulumi/pulumi/sdk/v3 v3.121.0
 	github.com/stretchr/testify v1.9.0
