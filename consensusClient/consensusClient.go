@@ -25,6 +25,7 @@ type ConsensusClientComponentArgs struct {
 	PodStorageClass                  string
 	PodStorageSize                   string
 	ExecutionJwt                     string
+	Name                             string
 }
 
 const (
