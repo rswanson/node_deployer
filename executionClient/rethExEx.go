@@ -194,7 +194,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		}
 	} else if args.DeploymentType == Kubernetes {
 		// Define static string variables
-		rethDataVolumeName := pulumi.String("reth-config-data")
+		rethDataVolumeName := pulumi.Sprintf("%s-config-data", args.Name)
 		rethTomlData, err := os.ReadFile(args.ExecutionClientConfigPath)
 		if err != nil {
 			return nil, err
@@ -219,7 +219,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 
 		// Define the PersistentVolumeClaim for host network database
 		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
-		_, err = corev1.NewPersistentVolumeClaim(ctx, "reth-data", &corev1.PersistentVolumeClaimArgs{
+		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: rethDataVolumeName,
 				Labels: pulumi.StringMap{
@@ -242,9 +242,9 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		}
 
 		// Define PersistentVolumeClaim for the execution extension local storage/db
-		_, err = corev1.NewPersistentVolumeClaim(ctx, "exex-persistent-storage", &corev1.PersistentVolumeClaimArgs{
+		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-persistent-storage", args.Name), &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("exex-persistent-storage"),
+				Name: pulumi.Sprintf("%s-persistent-storage", args.Name),
 				Labels: pulumi.StringMap{
 					"app.kubernetes.io/name":    pulumi.Sprintf("%s-persistent-storage", args.Name),
 					"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
@@ -265,14 +265,14 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 		}
 
 		// Create a secret for the execution jwt
-		secret, err := corev1.NewSecret(ctx, "execution-jwt", &corev1.SecretArgs{
+		secret, err := corev1.NewSecret(ctx, fmt.Sprintf("%s-execution-jwt", args.Name), &corev1.SecretArgs{
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("execution-jwt"),
+				Name: pulumi.Sprintf("%s-execution-jwt", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
+					"app.kubernetes.io/name": pulumi.Sprintf("%s-execution-jwt", args.Name),
 				},
 			},
 		}, pulumi.Parent(component))
@@ -322,7 +322,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 					Spec: &corev1.PodSpecArgs{
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
-								Name:    pulumi.String("reth"),
+								Name:    pulumi.Sprintf("%s", args.Name),
 								Image:   pulumi.String(args.ExecutionClientImage),
 								Command: pulumi.ToStringArray(args.ExecutionClientContainerCommands),
 								EnvFrom: corev1.EnvFromSourceArray{
@@ -367,11 +367,11 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 										MountPath: pulumi.String("/root/.local/share/reth"),
 									},
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("exex-persistent-storage"),
+										Name:      pulumi.Sprintf("%s-persistent-storage", args.Name),
 										MountPath: pulumi.String("/root/.local/share/exex"),
 									},
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("execution-jwt"),
+										Name:      pulumi.Sprintf("%s-execution-jwt", args.Name),
 										MountPath: pulumi.String("/etc/reth/execution-jwt"),
 									},
 								},
@@ -401,15 +401,15 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 								},
 							},
 							corev1.VolumeArgs{
-								Name: pulumi.String("execution-jwt"),
+								Name: pulumi.Sprintf("%s-execution-jwt", args.Name),
 								Secret: &corev1.SecretVolumeSourceArgs{
 									SecretName: secret.Metadata.Name(),
 								},
 							},
 							corev1.VolumeArgs{
-								Name: pulumi.String("exex-persistent-storage"),
+								Name: pulumi.Sprintf("%s-persistent-storage", args.Name),
 								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSourceArgs{
-									ClaimName: pulumi.String("exex-persistent-storage"),
+									ClaimName: pulumi.Sprintf("%s-persistent-storage", args.Name),
 								},
 							},
 						},

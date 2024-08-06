@@ -1,6 +1,8 @@
 package node_deployer
 
 import (
+	"strconv"
+
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/rswanson/node_deployer/consensusClient"
 	"github.com/rswanson/node_deployer/executionClient"
@@ -39,4 +41,19 @@ func NewEthereumNode(ctx *pulumi.Context, name string, args *EthereumNodeArgs, o
 		ExecutionClient: executionClient,
 		ConsensusClient: consensusClient,
 	}, nil
+}
+
+func EthereumNodeFactory(ctx *pulumi.Context, name string, args *EthereumNodeArgs, opts ...pulumi.ResourceOption) ([]*EthereumNode, error) {
+	// loop to create a number of EthereumNodes based on replicas
+	ethereumNodes := make([]*EthereumNode, 0)
+	for i := 0; i < args.Replicas; i++ {
+		args.ExecutionClientArgs.Name = name + "-" + strconv.Itoa(i)
+		args.ConsensusClientArgs.Name = name + "-" + strconv.Itoa(i)
+		ethereumNode, err := NewEthereumNode(ctx, name+"-"+strconv.Itoa(i), args, opts...)
+		if err != nil {
+			return nil, err
+		}
+		ethereumNodes = append(ethereumNodes, ethereumNode)
+	}
+	return ethereumNodes, nil
 }

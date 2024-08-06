@@ -129,11 +129,11 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		ctx.Log.Info("Docker deployment not yet implemented", nil)
 	} else if args.DeploymentType == Kubernetes {
 		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
-		_, err = corev1.NewPersistentVolumeClaim(ctx, "lighthouse-data", &corev1.PersistentVolumeClaimArgs{
+		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse-data"),
+				Name: pulumi.Sprintf("%s-data", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("lighthouse-data"),
+					"app.kubernetes.io/name":    pulumi.Sprintf("%s-data", args.Name),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
@@ -152,14 +152,14 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		}
 
 		// Create a secret for the execution jwt
-		secret, err := corev1.NewSecret(ctx, "execution-jwt", &corev1.SecretArgs{
+		secret, err := corev1.NewSecret(ctx, fmt.Sprintf("%s-execution-jwt", args.Name), &corev1.SecretArgs{
 			StringData: pulumi.StringMap{
 				"jwt.hex": pulumi.String(args.ExecutionJwt),
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("execution-jwt"),
+				Name: pulumi.Sprintf("%s-execution-jwt", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name": pulumi.String("execution-jwt"),
+					"app.kubernetes.io/name": pulumi.Sprintf("%s-execution-jwt", args.Name),
 				},
 			},
 		}, pulumi.Parent(component))
@@ -172,14 +172,14 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		if err != nil {
 			return nil, err
 		}
-		lighthouseConfigData, err := corev1.NewConfigMap(ctx, "lighthouse-config", &corev1.ConfigMapArgs{
+		lighthouseConfigData, err := corev1.NewConfigMap(ctx, "%s-config", &corev1.ConfigMapArgs{
 			Data: pulumi.StringMap{
 				"lighthouse.toml": pulumi.String(string(lighthouseTomlData)),
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse-config"),
+				Name: pulumi.String("%s-config"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("lighthouse-config"),
+					"app.kubernetes.io/name":    pulumi.String("%s-config"),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
@@ -189,11 +189,11 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		}
 
 		// Create a stateful set to run a lighthouse node with a configmap volume and a data persistent volume
-		_, err = appsv1.NewStatefulSet(ctx, "lighthouse-set", &appsv1.StatefulSetArgs{
+		_, err = appsv1.NewStatefulSet(ctx, fmt.Sprintf("%s-set", args.Name), &appsv1.StatefulSetArgs{
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse"),
+				Name: pulumi.Sprintf("%s", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("lighthouse-set"),
+					"app.kubernetes.io/name":    pulumi.Sprintf("%s-set", args.Name),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
@@ -201,21 +201,21 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 				Replicas: pulumi.Int(1),
 				Selector: &metav1.LabelSelectorArgs{
 					MatchLabels: pulumi.StringMap{
-						"app": pulumi.String("lighthouse"),
+						"app": pulumi.Sprintf("%s", args.Name),
 					},
 				},
 				Template: &corev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.StringMap{
-							"app":                       pulumi.String("lighthouse"),
-							"app.kubernetes.io/name":    pulumi.String("lighthouse"),
+							"app":                       pulumi.Sprintf("%s", args.Name),
+							"app.kubernetes.io/name":    pulumi.Sprintf("%s", args.Name),
 							"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 						},
 					},
 					Spec: &corev1.PodSpecArgs{
 						Containers: corev1.ContainerArray{
 							corev1.ContainerArgs{
-								Name:    pulumi.String("lighthouse"),
+								Name:    pulumi.Sprintf("%s", args.Name),
 								Image:   pulumi.String(args.ConsensusClientImage),
 								Command: pulumi.ToStringArray(args.ConsensusClientContainerCommands),
 								Ports: corev1.ContainerPortArray{
@@ -239,15 +239,15 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("lighthouse-config"),
+										Name:      pulumi.Sprintf("%s-config", args.Name),
 										MountPath: pulumi.String("/etc/lighthouse"),
 									},
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("lighthouse-data"),
+										Name:      pulumi.Sprintf("%s-data", args.Name),
 										MountPath: pulumi.String("/root/.lighthouse/holesky"),
 									},
 									corev1.VolumeMountArgs{
-										Name:      pulumi.String("execution-jwt"),
+										Name:      pulumi.Sprintf("%s-execution-jwt", args.Name),
 										MountPath: pulumi.String("/secrets"),
 									},
 								},
@@ -266,19 +266,19 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 						DnsPolicy: pulumi.String("ClusterFirst"),
 						Volumes: corev1.VolumeArray{
 							corev1.VolumeArgs{
-								Name: pulumi.String("lighthouse-config"),
+								Name: pulumi.Sprintf("%s-config", args.Name),
 								ConfigMap: &corev1.ConfigMapVolumeSourceArgs{
 									Name: lighthouseConfigData.Metadata.Name(),
 								},
 							},
 							corev1.VolumeArgs{
-								Name: pulumi.String("lighthouse-data"),
+								Name: pulumi.Sprintf("%s-data", args.Name),
 								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSourceArgs{
-									ClaimName: pulumi.String("lighthouse-data"),
+									ClaimName: pulumi.Sprintf("%s-data", args.Name),
 								},
 							},
 							corev1.VolumeArgs{
-								Name: pulumi.String("execution-jwt"),
+								Name: pulumi.Sprintf("%s-execution-jwt", args.Name),
 								Secret: &corev1.SecretVolumeSourceArgs{
 									SecretName: secret.Metadata.Name(),
 								},
@@ -293,9 +293,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		}
 
 		// Create ingress for lighthouse p2p traffic on port 9000
-		_, err = corev1.NewService(ctx, "lighthouse-p2p-service", &corev1.ServiceArgs{
+		_, err = corev1.NewService(ctx, fmt.Sprintf("%s-p2p-service", args.Name), &corev1.ServiceArgs{
 			Spec: &corev1.ServiceSpecArgs{
-				Selector: pulumi.StringMap{"app": pulumi.String("lighthouse")},
+				Selector: pulumi.StringMap{"app": pulumi.Sprintf("%s", args.Name)},
 				Type:     pulumi.String("NodePort"),
 				Ports: corev1.ServicePortArray{
 					corev1.ServicePortArgs{
@@ -310,9 +310,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 				},
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse-p2p-service"),
+				Name: pulumi.Sprintf("%s-p2p-service", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("lighthouse-p2p-service"),
+					"app.kubernetes.io/name":    pulumi.Sprintf("%s-p2p-service", args.Name),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
@@ -322,9 +322,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		}
 
 		// create the metrics service
-		_, err = corev1.NewService(ctx, "lighthouse-metrics-service", &corev1.ServiceArgs{
+		_, err = corev1.NewService(ctx, fmt.Sprintf("%s-metrics-service", args.Name), &corev1.ServiceArgs{
 			Spec: &corev1.ServiceSpecArgs{
-				Selector: pulumi.StringMap{"app": pulumi.String("lighthouse")},
+				Selector: pulumi.StringMap{"app": pulumi.Sprintf("%s", args.Name)},
 				Type:     pulumi.String("ClusterIP"),
 				Ports: corev1.ServicePortArray{
 
@@ -335,9 +335,9 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 				},
 			},
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("lighthouse-metrics-service"),
+				Name: pulumi.Sprintf("%s-metrics-service", args.Name),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("lighthouse-metrics-service"),
+					"app.kubernetes.io/name":    pulumi.Sprintf("%s-metrics-service", args.Name),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
