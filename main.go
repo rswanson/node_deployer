@@ -47,8 +47,8 @@ func EthereumNodeFactory(ctx *pulumi.Context, name string, args *EthereumNodeArg
 	// loop to create a number of EthereumNodes based on replicas
 	ethereumNodes := make([]*EthereumNode, 0)
 	for i := 0; i < args.Replicas; i++ {
-		args.ExecutionClientArgs.Name = name + "-" + strconv.Itoa(i)
-		args.ConsensusClientArgs.Name = name + "-" + strconv.Itoa(i)
+		args.ExecutionClientArgs.Name = args.ExecutionClientArgs.Name + "-" + strconv.Itoa(i)
+		args.ConsensusClientArgs.Name = args.ConsensusClientArgs.Name + "-" + strconv.Itoa(i)
 		ethereumNode, err := NewEthereumNode(ctx, name+"-"+strconv.Itoa(i), args, opts...)
 		if err != nil {
 			return nil, err
