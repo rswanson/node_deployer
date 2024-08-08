@@ -179,7 +179,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("%s-config"),
 				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.String("%s-config"),
+					"app.kubernetes.io/name":    pulumi.Sprintf("%s-config", args.Name),
 					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 				},
 			},
