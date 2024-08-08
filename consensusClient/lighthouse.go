@@ -172,7 +172,7 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		if err != nil {
 			return nil, err
 		}
-		lighthouseConfigData, err := corev1.NewConfigMap(ctx, "%s-config", &corev1.ConfigMapArgs{
+		lighthouseConfigData, err := corev1.NewConfigMap(ctx, fmt.Sprintf("%s-config", args.Name), &corev1.ConfigMapArgs{
 			Data: pulumi.StringMap{
 				"lighthouse.toml": pulumi.String(string(lighthouseTomlData)),
 			},
