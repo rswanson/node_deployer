@@ -37,7 +37,7 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 	}
 
 	component := &ExecutionClientComponent{}
-	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ExecutionClient:%s", args.Client), name, component, opts...)
+	err := ctx.RegisterComponentResource(fmt.Sprintf("custom:component:ExecutionClient:%s", args.Name), name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
