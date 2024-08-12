@@ -28,6 +28,8 @@ type ExecutionClientComponentArgs struct {
 	InstanceNumber                   int
 	EnableIngress                    bool
 	Name                             string
+	RethSnapshotName                 string
+	ExExSnapshotName                 string
 }
 
 const (
