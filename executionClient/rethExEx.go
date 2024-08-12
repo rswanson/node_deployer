@@ -217,51 +217,110 @@ func NewRethExExComponent(ctx *pulumi.Context, name string, args *ExecutionClien
 			return nil, err
 		}
 
-		// Define the PersistentVolumeClaim for host network database
-		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
-		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
-			Metadata: &metav1.ObjectMetaArgs{
-				Name: rethDataVolumeName,
-				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    rethDataVolumeName,
-					"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
-				},
-			},
-			Spec: &corev1.PersistentVolumeClaimSpecArgs{
-				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
-				Resources: &corev1.VolumeResourceRequirementsArgs{
-					Requests: pulumi.StringMap{
-						"storage": storageSize,
+		// Define the PersistentVolumeClaim for reth datadir
+		if args.RethSnapshotName != "" {
+			storageSize := pulumi.String(args.PodStorageSize)
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: rethDataVolumeName,
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    rethDataVolumeName,
+						"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
 					},
 				},
-				StorageClassName: pulumi.String(args.PodStorageClass),
-			},
-		}, pulumi.Parent(component))
-		if err != nil {
-			return nil, err
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")},
+					DataSource: &corev1.TypedLocalObjectReferenceArgs{
+						Kind:     pulumi.String("VolumeSnapshot"),
+						Name:     pulumi.String(args.RethSnapshotName),
+						ApiGroup: pulumi.String("snapshot.storage.k8s.io"),
+					},
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": storageSize,
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			storageSize := pulumi.String(args.PodStorageSize)
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: rethDataVolumeName,
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    rethDataVolumeName,
+						"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
+					},
+				},
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")},
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": storageSize,
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		// Define PersistentVolumeClaim for the execution extension local storage/db
-		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-persistent-storage", args.Name), &corev1.PersistentVolumeClaimArgs{
-			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.Sprintf("%s-persistent-storage", args.Name),
-				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.Sprintf("%s-persistent-storage", args.Name),
-					"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
-				},
-			},
-			Spec: &corev1.PersistentVolumeClaimSpecArgs{
-				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
-				Resources: &corev1.VolumeResourceRequirementsArgs{
-					Requests: pulumi.StringMap{
-						"storage": pulumi.String(args.ExExStorageSize),
+		if args.ExExSnapshotName != "" {
+			// Define PersistentVolumeClaim for the execution extension local storage/db
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-persistent-storage", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: pulumi.Sprintf("%s-persistent-storage", args.Name),
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    pulumi.Sprintf("%s-persistent-storage", args.Name),
+						"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
 					},
 				},
-				StorageClassName: pulumi.String(args.PodStorageClass),
-			},
-		}, pulumi.Parent(component))
-		if err != nil {
-			return nil, err
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")},
+					DataSource: &corev1.TypedLocalObjectReferenceArgs{
+						Kind:     pulumi.String("VolumeSnapshot"),
+						Name:     pulumi.String(args.ExExSnapshotName),
+						ApiGroup: pulumi.String("snapshot.storage.k8s.io"),
+					},
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": pulumi.String(args.ExExStorageSize),
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-persistent-storage", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: pulumi.Sprintf("%s-persistent-storage", args.Name),
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    pulumi.Sprintf("%s-persistent-storage", args.Name),
+						"app.kubernetes.io/part-of": pulumi.Sprintf("%s", args.Name),
+					},
+				},
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")},
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": pulumi.String(args.ExExStorageSize),
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// Create a secret for the execution jwt
