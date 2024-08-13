@@ -129,26 +129,56 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 		ctx.Log.Info("Docker deployment not yet implemented", nil)
 	} else if args.DeploymentType == Kubernetes {
 		storageSize := pulumi.String(args.PodStorageSize) // 30Gi size for holesky
-		_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
-			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.Sprintf("%s-data", args.Name),
-				Labels: pulumi.StringMap{
-					"app.kubernetes.io/name":    pulumi.Sprintf("%s-data", args.Name),
-					"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
-				},
-			},
-			Spec: &corev1.PersistentVolumeClaimSpecArgs{
-				AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
-				Resources: &corev1.VolumeResourceRequirementsArgs{
-					Requests: pulumi.StringMap{
-						"storage": storageSize,
+
+		if args.SnapshotName != "" {
+
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: pulumi.Sprintf("%s-data", args.Name),
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    pulumi.Sprintf("%s-data", args.Name),
+						"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
 					},
 				},
-				StorageClassName: pulumi.String(args.PodStorageClass),
-			},
-		}, pulumi.Parent(component))
-		if err != nil {
-			return nil, err
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
+					DataSource: &corev1.TypedLocalObjectReferenceArgs{
+						Kind: pulumi.String("PersistentVolumeSnapshot"),
+						Name: pulumi.String(args.SnapshotName),
+					},
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": storageSize,
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			_, err = corev1.NewPersistentVolumeClaim(ctx, fmt.Sprintf("%s-data", args.Name), &corev1.PersistentVolumeClaimArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name: pulumi.Sprintf("%s-data", args.Name),
+					Labels: pulumi.StringMap{
+						"app.kubernetes.io/name":    pulumi.Sprintf("%s-data", args.Name),
+						"app.kubernetes.io/part-of": pulumi.String("lighthouse"),
+					},
+				},
+				Spec: &corev1.PersistentVolumeClaimSpecArgs{
+					AccessModes: pulumi.StringArray{pulumi.String("ReadWriteOnce")}, // This should match your requirements
+					Resources: &corev1.VolumeResourceRequirementsArgs{
+						Requests: pulumi.StringMap{
+							"storage": storageSize,
+						},
+					},
+					StorageClassName: pulumi.String(args.PodStorageClass),
+				},
+			}, pulumi.Parent(component))
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// Create a secret for the execution jwt

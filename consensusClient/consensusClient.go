@@ -26,6 +26,7 @@ type ConsensusClientComponentArgs struct {
 	PodStorageSize                   string
 	ExecutionJwt                     string
 	Name                             string
+	SnapshotName                     string
 }
 
 const (
