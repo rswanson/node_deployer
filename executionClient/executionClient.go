@@ -30,6 +30,10 @@ type ExecutionClientComponentArgs struct {
 	Name                             string
 	RethSnapshotName                 string
 	ExExSnapshotName                 string
+	CpuLimit                         string
+	MemoryLimit                      string
+	CpuRequest                       string
+	MemoryRequest                    string
 }
 
 const (

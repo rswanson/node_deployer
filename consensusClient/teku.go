@@ -260,6 +260,16 @@ func NewTekuComponent(ctx *pulumi.Context, name string, args *ConsensusClientCom
 										MountPath: pulumi.String("/secrets"),
 									},
 								},
+								Resources: &corev1.ResourceRequirementsArgs{
+									Limits: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuLimit),
+										"memory": pulumi.String(args.MemoryLimit),
+									},
+									Requests: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuRequest),
+										"memory": pulumi.String(args.MemoryRequest),
+									},
+								},
 							},
 						},
 						DnsPolicy: pulumi.String("ClusterFirst"),

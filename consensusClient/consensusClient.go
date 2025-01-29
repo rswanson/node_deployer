@@ -27,6 +27,10 @@ type ConsensusClientComponentArgs struct {
 	ExecutionJwt                     string
 	Name                             string
 	SnapshotName                     string
+	CpuLimit                         string
+	MemoryLimit                      string
+	CpuRequest                       string
+	MemoryRequest                    string
 }
 
 const (

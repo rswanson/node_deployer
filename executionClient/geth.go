@@ -273,6 +273,16 @@ func NewGethComponent(ctx *pulumi.Context, name string, args *ExecutionClientCom
 										MountPath: pulumi.String("/etc/geth/execution-jwt"),
 									},
 								},
+								Resources: &corev1.ResourceRequirementsArgs{
+									Limits: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuLimit),
+										"memory": pulumi.String(args.MemoryLimit),
+									},
+									Requests: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuRequest),
+										"memory": pulumi.String(args.MemoryRequest),
+									},
+								},
 							},
 						},
 						Volumes: corev1.VolumeArray{
