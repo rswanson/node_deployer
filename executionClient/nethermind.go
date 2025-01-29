@@ -263,6 +263,16 @@ func NewNethermindComponent(ctx *pulumi.Context, name string, args *ExecutionCli
 										MountPath: pulumi.String("/etc/nethermind/execution-jwt"),
 									},
 								},
+								Resources: &corev1.ResourceRequirementsArgs{
+									Limits: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuLimit),
+										"memory": pulumi.String(args.MemoryLimit),
+									},
+									Requests: pulumi.StringMap{
+										"cpu":    pulumi.String(args.CpuRequest),
+										"memory": pulumi.String(args.MemoryRequest),
+									},
+								},
 							},
 						},
 						Volumes: corev1.VolumeArray{

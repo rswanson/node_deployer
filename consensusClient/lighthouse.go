@@ -283,12 +283,12 @@ func NewLighthouseComponent(ctx *pulumi.Context, name string, args *ConsensusCli
 								},
 								Resources: &corev1.ResourceRequirementsArgs{
 									Limits: pulumi.StringMap{
-										"cpu":    pulumi.String("4"),
-										"memory": pulumi.String("16Gi"),
+										"cpu":    pulumi.String(args.CpuLimit),
+										"memory": pulumi.String(args.MemoryLimit),
 									},
 									Requests: pulumi.StringMap{
-										"cpu":    pulumi.String("4"),
-										"memory": pulumi.String("16Gi"),
+										"cpu":    pulumi.String(args.CpuRequest),
+										"memory": pulumi.String(args.MemoryRequest),
 									},
 								},
 							},
