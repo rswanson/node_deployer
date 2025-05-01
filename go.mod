@@ -7,7 +7,7 @@ toolchain go1.24.2
 require (
 	github.com/pulumi/pulumi-command/sdk v1.0.2
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.22.1
-	github.com/pulumi/pulumi/sdk/v3 v3.160.0
+	github.com/pulumi/pulumi/sdk/v3 v3.166.0
 	github.com/stretchr/testify v1.10.0
 )
 
