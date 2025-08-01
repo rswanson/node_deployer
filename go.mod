@@ -1,13 +1,13 @@
 module github.com/rswanson/node_deployer
 
-go 1.23.0
+go 1.23.11
 
 toolchain go1.24.2
 
 require (
 	github.com/pulumi/pulumi-command/sdk v1.1.0
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.23.0
-	github.com/pulumi/pulumi/sdk/v3 v3.185.0
+	github.com/pulumi/pulumi/sdk/v3 v3.187.0
 	github.com/stretchr/testify v1.10.0
 )
 
