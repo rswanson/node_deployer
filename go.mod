@@ -5,7 +5,7 @@ go 1.25.8
 require (
 	github.com/pulumi/pulumi-command/sdk v1.2.1
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.28.0
-	github.com/pulumi/pulumi/sdk/v3 v3.236.0
+	github.com/pulumi/pulumi/sdk/v3 v3.237.0
 	github.com/stretchr/testify v1.11.1
 )
 
